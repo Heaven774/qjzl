@@ -1,0 +1,25 @@
+{
+  "name": "qjzl-database-server",
+  "version": "1.0.0",
+  "description": "辣椒智慧农业数据库服务",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "start:db": "node server.js",
+    "start:rtsp": "cd .. && python rtsp_server.py",
+    "install-all": "npm install && cd .. && pip install flask flask-cors requests opencv-python numpy"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mysql2": "^3.6.0",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2"
+    
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["agriculture", "database", "api"],
+  "author": "辣椒智慧农业",
+  "license": "MIT"
+}

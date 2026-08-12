@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>辣椒智慧农业 - 数据管理中心</title>
+    <link rel="stylesheet" href="css/floating-panel.css">
+    <style>
+        body {
+            padding: 20px;
+        }
+        :root { --text: #e0f7ff; }
+
+        /* ===== Header ===== */
+        header {
+            padding: 18px 32px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo { display: flex; align-items: center; gap: 14px; }
+        .header-right { display: flex; gap: 20px; align-items: center; }
+        .logo-icon {
+            width: 42px; height: 42px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem;
+            background: var(--primary-dim);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 245, 255, 0.15);
+        }
+        .logo-title {
+            font-size: 1.35rem; font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .connection-status {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--danger);
+            flex-shrink: 0;
+        }
+        .status-dot.connected {
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        .nav-links { display: flex; gap: 10px; }
+        .nav-link {
+            padding: 8px 18px;
+            background: rgba(0, 245, 255, 0.06);
+            border: 1px solid rgba(0, 245, 255, 0.15);
+            border-radius: 20px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        .nav-link:hover {
+            background: rgba(0, 245, 255, 0.15);
+            border-color: rgba(0, 245, 255, 0.35);
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.08);
+        }
+
+        /* ===== Stats Cards ===== */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        /* ===== Tabs ===== */
+        .tabs-container {
+            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+        }
+        .tab-btn {
+            padding: 10px 22px;
+            background: transparent;
+            border: 1px solid rgba(0, 245, 255, 0.12);
+            border-radius: 20px;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-size: 0.88rem;
+            transition: var(--transition);
+        }
+        .tab-btn:hover {
+            border-color: rgba(0, 245, 255, 0.3);
+            color: var(--text);
+            background: rgba(0, 245, 255, 0.04);
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(126, 66, 255, 0.1));
+            border-color: rgba(0, 245, 255, 0.4);
+            color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.06);
+            font-weight: 600;
+        }
+
+        /* ===== Filters ===== */
+        .filters-section {
+            padding: 18px 20px;
+            margin-bottom: 16px;
+        }
+        .filters-row {
+            display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;
+        }
+        .filter-item {
+            display: flex; flex-direction: column; gap: 5px;
+        }
+        .filter-label {
+            color: var(--text-dim); font-size: 0.78rem; font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .filter-input, .filter-select, .date-input-large, .hour-select-large {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(0, 245, 255, 0.15);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.9rem;
+            padding: 10px 14px;
+            outline: none;
+            transition: var(--transition);
+        }
+        .filter-input:hover, .filter-select:hover,
+        .date-input-large:hover, .hour-select-large:hover {
+            border-color: rgba(0, 245, 255, 0.35);
+        }
+        .filter-input:focus, .filter-select:focus,
+        .date-input-large:focus, .hour-select-large:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 245, 255, 0.08);
+        }
+
+        .filter-select, .hour-select-large {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2300f5ff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+            cursor: pointer;
+        }
+        .filter-select option, .hour-select-large option {
+            background: #0f1520; color: var(--text);
+        }
+
+        .date-input-large {
+            min-width: 170px;
+            border-radius: var(--radius-full);
+            padding: 11px 22px;
+        }
+        .date-input-large::-webkit-calendar-picker-indicator {
+            filter: invert(0.8); cursor: pointer; opacity: 0.6;
+        }
+
+        .hour-select-large {
+            min-width: 150px;
+        }
+
+        .btn-style {
+            border-radius: var(--radius-full);
+            padding: 11px 24px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            min-width: 120px;
+        }
+
+        /* ===== Buttons ===== */
+        .btn {
+            padding: 8px 18px; border-radius: 8px; border: none;
+            cursor: pointer; font-weight: 500; font-size: 0.88rem;
+            transition: var(--transition);
+        }
+        .btn-large {
+            border-radius: var(--radius-full);
+            padding: 11px 24px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            min-width: 120px;
+        }
+
+        .btn-danger {
+            background: rgba(255, 71, 87, 0.12);
+            border: 1px solid rgba(255, 71, 87, 0.25);
+            color: #ff6b81;
+        }
+        .btn-danger:hover {
+            background: rgba(255, 71, 87, 0.2);
+            border-color: rgba(255, 71, 87, 0.4);
+            box-shadow: 0 4px 16px rgba(255, 71, 87, 0.15);
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.12), rgba(126, 66, 255, 0.08));
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            color: var(--primary);
+        }
+        .btn-export:hover {
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.2), rgba(126, 66, 255, 0.15));
+            border-color: rgba(0, 245, 255, 0.4);
+            box-shadow: 0 4px 20px rgba(0, 245, 255, 0.1);
+        }
+
+        .btn:active, .btn-large:active {
+            transform: scale(0.97);
+        }
+
+        /* ===== Data Section & Table ===== */
+        .data-section {
+            padding: 15px;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+        .table-container {
+            overflow-x: auto;
+            padding: 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* ===== States ===== */
+        .loading-state, .empty-state {
+            text-align: center; padding: 60px 20px; color: var(--text-dim);
+        }
+        /* ===== Chips / Action Links ===== */
+        .action-link {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .action-link-view {
+            color: var(--primary);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            background: rgba(0, 245, 255, 0.05);
+        }
+        .action-link-view:hover {
+            background: rgba(0, 245, 255, 0.12);
+            border-color: rgba(0, 245, 255, 0.4);
+        }
+        .action-link-download {
+            color: #b388ff;
+            border: 1px solid rgba(126, 66, 255, 0.25);
+            background: rgba(126, 66, 255, 0.06);
+        }
+        .action-link-download:hover {
+            background: rgba(126, 66, 255, 0.14);
+            border-color: rgba(126, 66, 255, 0.45);
+        }
+        .action-link-delete {
+            color: #ff5252;
+            border: 1px solid rgba(255, 82, 82, 0.25);
+            background: rgba(255, 82, 82, 0.06);
+        }
+        .action-link-delete:hover {
+            background: rgba(255, 82, 82, 0.14);
+            border-color: rgba(255, 82, 82, 0.45);
+        }
+
+        /* ===== Chart ===== */
+        #chart-container {
+            position: fixed; left: -9999px; top: -9999px;
+            width: 900px; height: 500px;
+            background: linear-gradient(135deg, #020408 0%, #050811 50%, #0a0e17 100%);
+            border: 1px solid rgba(0, 245, 255, 0.1);
+        }
+
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body>
+    <header class="floating-panel">
+        <div class="logo">
+            <div class="logo-icon">🌶️</div>
+            <div class="logo-title">辣椒智慧农业 - 数据管理中心</div>
+        </div>
+        <div class="header-right">
+            <div class="connection-status">
+                <div class="status-dot" id="connection-dot"></div>
+                <span id="connection-text">连接中...</span>
+            </div>
+            <nav class="nav-links">
+                <a href="/index.html" class="nav-link">🏠 返回首页</a>
+                <a href="/qjzl/Smart.html" class="nav-link">📊 数据管理</a>
+                <a href="/qjzl/lenglian.html" class="nav-link">🚛 运输管理</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="stats-section">
+        <div class="stat-card">
+            <div class="stat-icon">👤</div>
+            <div class="stat-value" id="stat-login">--</div>
+            <div class="stat-label">登录操作记录</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-value" id="stat-sensor">--</div>
+            <div class="stat-label">传感器数据记录</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⚙️</div>
+            <div class="stat-value" id="stat-device">--</div>
+            <div class="stat-label">设备状态记录</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🤖</div>
+            <div class="stat-value" id="stat-ai">--</div>
+            <div class="stat-label">AI分析记录</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🚛</div>
+            <div class="stat-value" id="stat-vehicle">--</div>
+            <div class="stat-label">车辆运输记录</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📷</div>
+            <div class="stat-value" id="stat-pictrue">--</div>
+            <div class="stat-label">监控图片</div>
+        </div>
+        <div class="stat-card" onclick="switchTab('blockchain')" style="cursor:pointer">
+            <div class="stat-icon">⛓️</div>
+            <div class="stat-value" id="stat-blockchain">--</div>
+            <div class="stat-label">区块链存证</div>
+        </div>
+
+    </div>
+
+    <div class="tabs-container">
+        <button class="tab-btn active" onclick="switchTab('login')">👤 登录日志</button>
+        <button class="tab-btn" onclick="switchTab('sensor')">📊 传感器数据</button>
+        <button class="tab-btn" onclick="switchTab('device')">⚙️ 设备状态</button>
+        <button class="tab-btn" onclick="switchTab('ai')">🤖 AI分析</button>
+        <button class="tab-btn" onclick="switchTab('vehicle')">🚛 车辆数据</button>
+         <button class="tab-btn" onclick="switchTab('pictrue')">📷 监控图片</button>
+        <button class="tab-btn" onclick="switchTab('system')">📝 系统日志</button>
+        <button class="tab-btn" onclick="switchTab('blockchain')">🔗 区块链查询</button>
+       
+       
+    </div>
+
+    <div class="filters-section floating-panel" id="filters-section">
+        <!-- 筛选器会动态生成 -->
+    </div>
+
+    <div class="data-section floating-panel">
+        <div class="table-container" id="data-content">
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>正在加载数据...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 隐藏的图表容器 -->
+    <div id="chart-container"><canvas id="export-chart-canvas"></canvas></div>
+
+    <script>
+        const HOSTNAME = window.location.hostname;
+        const API_BASE = `/api`;
+        const FLASK_API_BASE = `/disease/api`;
+        let currentTab = 'login';
+        let vehicleOptions = [{ value: '', label: '全部车辆' }];
+        let timeMode = 'day';
+
+        function toggleTimeMode() {
+            timeMode = timeMode === 'day' ? 'hour' : 'day';
+            renderFilters();
+        }
+
+        const tabConfigs = {
+            login: { api: '/login/logs', columns: [
+                { name: '记录ID', field: 'id' },
+                { name: '用户名', field: 'username' },
+                { name: '登录时间', field: 'login_time' },
+                { name: 'IP地址', field: 'ip_address' },
+                { name: '状态', field: 'status' },
+                { name: '失败原因', field: 'failure_reason' }
+            ]},
+            sensor: { api: '/sensor/data', columns: [
+                { name: '记录ID', field: 'id' },
+                { name: '设备标识', field: 'device_id' },
+                { name: '传感器标识', field: 'sensor_type' },
+                { name: '传感器名称', field: 'sensor_name' },
+                { name: '传感器值', field: 'value' },
+                { name: '单位', field: 'unit' },
+                { name: '位置', field: 'location' },
+                { name: '记录时间', field: 'record_time' }
+            ]},
+            device: { api: '/device/status', columns: [
+                { name: '记录ID', field: 'id' },
+                { name: '设备标识', field: 'device_id' },
+                { name: '设备名称', field: 'device_name' },
+                { name: '状态', field: 'status' },
+                { name: '操作', field: 'action' },
+                { name: '位置', field: 'location' },
+                { name: '记录时间', field: 'record_time' }
+            ]},
+            ai: { api: '/ai/analysis', columns: [
+                { name: '记录ID', field: 'id' },
+                { name: '分析类型', field: 'analysis_type' },
+                { name: '环境评估', field: 'environment_assessment' },
+                { name: '风险等级', field: 'risk_level' },
+                { name: '置信度', field: 'confidence_score' },
+                { name: '分析时间', field: 'analysis_time' }
+            ]},
+            vehicle: { api: '/vehicle/data', columns: [
+                { name: '记录ID', field: 'id' },
+                { name: '车辆ID', field: 'vehicle_id' },
+                { name: '车牌号', field: 'vehicle_number' },
+                { name: '温度', field: 'temperature' },
+                { name: '湿度', field: 'humidity' },
+                { name: 'CO2浓度', field: 'co2_level' },
+                { name: '门状态', field: 'door_status' },
+                { name: '记录时间', field: 'record_time' }
+            ]},
+            system: { api: '/system/logs', columns: [
+                { name: '记录ID', field: 'id' },
+                { name: '日志类型', field: 'log_type' },
+                { name: '模块', field: 'module' },
+                { name: '操作', field: 'action' },
+                { name: '消息', field: 'message' },
+                { name: '记录时间', field: 'record_time' }
+            ]},
+            pictrue: { api: '/pictrue', columns: [
+                { name: '图片ID', field: 'id' },
+                { name: '文件名', field: 'filename' },
+                { name: '大小', field: 'filesize' },
+                { name: '生长阶段', field: 'stage' },
+                { name: '拍摄时间', field: 'created_at' },
+                { name: '操作', field: '_action' }
+            ]},
+            blockchain: { api: '/blockchain', columns: [
+                { name: 'ID', field: 'id' },
+                { name: '溯源码', field: 'proof_code' },
+                { name: '生产日期', field: 'prod_date' },
+                { name: '区域码', field: 'region_code' },
+                { name: '品种码', field: 'variety_code' },
+                { name: '批次号', field: 'batch_no' },
+                { name: '验证码', field: 'verify_code' },
+                { name: '拼接原文', field: 'raw_material' },
+                { name: 'MD5存证哈希', field: 'md5_hash' },
+                { name: '验证', field: '_verify' },
+                { name: '存证时间', field: 'created_at' }
+            ]},
+        };
+
+        window.addEventListener('load', async function() {
+            checkConnection();
+            loadStats();
+            await loadVehicleNumbers();
+            renderFilters();
+            loadData();
+        });
+
+        async function loadVehicleNumbers() {
+            try {
+                const response = await fetch(`${API_BASE}/vehicle/numbers`);
+                const result = await response.json();
+                console.log('获取车牌号结果:', result);
+                if (result.success && result.data.length > 0) {
+                    vehicleOptions = [{ value: '', label: '全部车辆' }];
+                    result.data.forEach(num => {
+                        const exists = vehicleOptions.some(opt => opt.value === num);
+                        if (!exists) {
+                            vehicleOptions.push({ value: num, label: '车辆 ' + num });
+                        }
+                    });
+                    console.log('更新后的车辆选项:', vehicleOptions);
+                }
+            } catch (error) {
+                console.error('获取车牌号失败:', error);
+            }
+        }
+
+        async function checkConnection() {
+            const dot = document.getElementById('connection-dot');
+            const text = document.getElementById('connection-text');
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const result = await response.json();
+                if (result.status === 'ok') {
+                    dot.classList.add('connected');
+                    text.textContent = '数据库已连接';
+                } else {
+                    throw new Error('连接失败');
+                }
+            } catch (error) {
+                dot.classList.remove('connected');
+                text.textContent = '数据库未连接';
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE}/stats/overview`);
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('stat-sensor').textContent = result.data.sensor_count.toLocaleString();
+                    document.getElementById('stat-device').textContent = result.data.device_count.toLocaleString();
+                    document.getElementById('stat-login').textContent = result.data.login_count.toLocaleString();
+                    document.getElementById('stat-ai').textContent = result.data.ai_count.toLocaleString();
+                    document.getElementById('stat-vehicle').textContent = result.data.vehicle_count.toLocaleString();
+                    document.getElementById('stat-pictrue').textContent = (result.data.pictrue_count || 0).toLocaleString();
+                    document.getElementById('stat-blockchain').textContent = (result.data.blockchain_count || 0).toLocaleString();
+                }
+            } catch (error) {
+                console.error('加载统计数据失败:', error);
+            }
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(`'${tab}'`)) {
+                    b.classList.add('active');
+                }
+            });
+            renderFilters();
+            loadData();
+        }
+
+        function renderFilters() {
+            const section = document.getElementById('filters-section');
+            const sensorOptions = [
+                { value: '', label: '全部传感器' },
+                { value: 's_temp', label: '幼苗区_温度' },
+                { value: 's_hum', label: '幼苗区_湿度' },
+                { value: 's_lx', label: '幼苗区_光照' },
+                { value: 's_sox', label: '幼苗区_有害气体' },
+                { value: 'e_tamb', label: '种植区_环境温度' },
+                { value: 'e_ah', label: '种植区_环境湿度' },
+                { value: 'e_tvoc', label: '种植区_空气质量' },
+                { value: 'e_bt', label: '种植区_人体感应' },
+                { value: 'e_pm', label: '种植区_PM2.5' },
+                { value: 'e_patm', label: '种植区_大气压' },
+                { value: 'ws', label: '种植区_风速' },
+                { value: 'p_temp', label: '种植区_土壤温度' },
+                { value: 'p_hum', label: '种植区_土壤湿度' },
+                { value: 'p_ph', label: '种植区_土壤PH' },
+                { value: 'p_N', label: '种植区_土壤氮' },
+                { value: 'p_P', label: '种植区_土壤磷' },
+                { value: 'p_K', label: '种植区_土壤钾' },
+                { value: 'd_temp', label: '烘干区_温度' },
+                { value: 'd_hum', label: '烘干区_湿度' },
+                { value: 'w_ll', label: '蓄水区_液位' },
+                { value: 'r_temp', label: '冷链_温度' },
+                { value: 'r_hum', label: '冷链_湿度' },
+                { value: 'r_co2', label: '冷链_CO2' }
+            ];
+            const actuatorOptions = [
+                { value: '', label: '全部执行器' },
+                { value: '幼苗区_补光灯', label: '幼苗区_补光灯' },
+                { value: '幼苗区_通风扇', label: '幼苗区_通风扇' },
+                { value: '蓄水区_水泵', label: '蓄水区_水泵' },
+                { value: '烘干区_烘干灯', label: '烘干区_烘干灯' },
+                { value: '烘干区_传送带', label: '烘干区_传送带' },
+                { value: '烘干区_风扇', label: '烘干区_风扇' },
+                { value: '预警灯', label: '预警灯' },
+                { value: '蜂鸣器', label: '蜂鸣器' },
+            ];
+
+            let selectOptions = [];
+            if (currentTab === 'sensor') {
+                selectOptions = sensorOptions;
+            } else if (currentTab === 'device') {
+                selectOptions = actuatorOptions;
+            } else if (currentTab === 'vehicle') {
+                selectOptions = vehicleOptions;
+            } else if (currentTab === 'system') {
+                selectOptions = [
+                    { value: '', label: '全部模块' },
+                    { value: '平台', label: '平台' },
+                    { value: '数据监控', label: '数据监控' },
+                    { value: 'AI分析', label: 'AI分析' },
+                ];
+            }
+
+            const selectHtml = selectOptions.map(opt => `<option value="${opt.value}">${opt.label}</option>`).join('');
+            
+            const hours = Array.from({length: 24}, (_, i) => `<option value="${String(i).padStart(2, '0')}">${String(i).padStart(2, '0')}时</option>`).join('');
+            
+            const today = new Date();
+            const curYear = today.getFullYear();
+            const curMonth = String(today.getMonth() + 1).padStart(2, '0');
+            const curDay = String(today.getDate()).padStart(2, '0');
+            
+            const prevDate = document.getElementById('filter-date')?.value || `${curYear}-${curMonth}-${curDay}`;
+            const prevHour = document.getElementById('filter-hour')?.value || '';
+            
+            const hourVisible = true;
+            
+            // 阶段筛选按钮配置
+            const stageFilterOptions = [
+                { value: '', label: '全部', cls: '' },
+                { value: 'seedling', label: '育苗期', cls: 'badge-success' },
+                { value: 'grow', label: '生长开花期', cls: 'badge-info' },
+                { value: 'harvest', label: '采收期', cls: 'badge-danger' },
+                { value: 'other', label: '其他', cls: 'badge-info' }
+            ];
+            const currentStage = document.getElementById('filter-stage')?.value || '';
+
+            section.innerHTML = `
+                <div class="filters-section">
+                    <div class="filters-row">
+                        <div class="filter-item">
+                            <label class="filter-label">📅 选择日期</label>
+                            <input type="date" class="date-input-large btn-style" id="filter-date" value="${prevDate}">
+                        </div>
+                        <div class="filter-item">
+                            <label class="filter-label">⏰ 选择小时</label>
+                            <select class="filter-select btn-style" id="filter-hour">
+                                <option value="">🕐 全部时段</option>
+                                ${hours}
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label class="filter-label">&nbsp;</label>
+                            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                <button class="btn btn-large btn-gradient" onclick="loadData()">🔍 查询</button>
+                                <button class="btn btn-large btn-outline" onclick="resetFilters()">🔄 重置</button>
+                                ${currentTab !== 'blockchain' ? `
+                                <button class="btn btn-large btn-danger" onclick="cleanupSelectedDate()">🗑️ 清除选中</button>
+                                <button class="btn btn-large btn-danger" onclick="cleanup7Days()">🗑️ 清除7天</button>
+                                ` : ''}
+                                ${currentTab === 'sensor' ? `<button class="btn btn-large btn-export" onclick="exportSensorChart()">📈 导出折线图</button>` : ''}
+                                ${currentTab === 'pictrue' ? `<button class="btn btn-large btn-export" onclick="exportPictures()">📥 下载图片</button>` : ''}
+                                <button class="btn btn-large btn-export" onclick="exportToXLS()">📊 导出XLS</button>
+                            </div>
+                        </div>
+                        ${selectOptions.length > 0 ? `
+                        <div class="filter-item">
+                            <label class="filter-label">&nbsp;</label>
+                            <select class="filter-select btn-style" id="filter-select">
+                                ${selectHtml}
+                            </select>
+                        </div>
+                        ` : ''}
+                    </div>
+                    ${currentTab === 'pictrue' ? `
+                    <div class="filters-row" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,245,255,0.1);">
+                        <div class="filter-item" style="width: 100%;">
+                            <label class="filter-label">🌶️ 生长阶段筛选</label>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;">
+                                ${stageFilterOptions.map(opt => `
+                                    <button class="btn ${opt.value === currentStage ? 'btn-gradient' : 'btn-outline'}" 
+                                            style="padding: 6px 16px; font-size: 0.85rem; border-radius: 20px;"
+                                            onclick="setStageFilter('${opt.value}')">
+                                        ${opt.label}
+                                    </button>
+                                `).join('')}
+                            </div>
+                            <input type="hidden" id="filter-stage" value="${currentStage}">
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            if (hourVisible) {
+                document.getElementById('filter-hour').value = prevHour;
+            }
+        }
+
+        function resetFilters() {
+            const today = new Date();
+            const curDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            document.getElementById('filter-date').value = curDate;
+            document.getElementById('filter-hour').value = '';
+            const filterSelect = document.getElementById('filter-select');
+            if (filterSelect) filterSelect.value = '';
+            // 重置阶段筛选
+            const stageInput = document.getElementById('filter-stage');
+            if (stageInput) stageInput.value = '';
+            renderFilters();
+            loadData();
+        }
+
+        function setStageFilter(stage) {
+            const input = document.getElementById('filter-stage');
+            if (input) {
+                input.value = stage;
+                renderFilters();
+                loadData();
+            }
+        }
+
+        async function cleanupSelectedDate() {
+            const filterDate = document.getElementById('filter-date').value;
+            const filterHour = document.getElementById('filter-hour').value;
+            const filterSelect = document.getElementById('filter-select');
+            const selectedValue = filterSelect ? filterSelect.value : '';
+            
+            let type = 'selected';
+            let confirmMsg = '';
+            let dateRange = filterDate;
+            
+            // 获取当前标签页的名称
+            const tabNames = {
+                'login': '登录日志',
+                'sensor': '传感器数据',
+                'device': '设备状态',
+                'ai': 'AI分析',
+                'system': '系统日志',
+                'pictrue': '监控图片'
+            };
+            
+            let tabName = tabNames[currentTab] || '所有数据';
+            let filterText = selectedValue ? `【${selectedValue}】` : '';
+            
+            if (filterHour) {
+                const hourText = `${filterHour}时`;
+                confirmMsg = `确定要清除${filterDate} ${hourText}的${tabName}${filterText}吗？\n此操作不可恢复！`;
+            } else {
+                confirmMsg = `确定要清除${filterDate}这一天的${tabName}${filterText}吗？\n此操作不可恢复！`;
+            }
+            
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+            
+            try {
+                const params = new URLSearchParams();
+                params.append('type', type);
+                params.append('date', dateRange);
+                if (filterHour) {
+                    params.append('hour', filterHour);
+                }
+                if (selectedValue) {
+                    params.append('filter_value', selectedValue);
+                }
+                params.append('current_tab', currentTab);
+                
+                const response = await fetch(`${API_BASE}/cleanup`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: params
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`成功清除 ${result.count} 条数据`);
+                    loadData();
+                    loadStats(); // 刷新统计数据
+                } else {
+                    alert('清除数据失败：' + (result.message || '未知错误'));
+                }
+            } catch (error) {
+                alert('清除数据失败：网络错误');
+                console.error('清除数据失败:', error);
+            }
+        }
+
+        async function cleanup7Days() {
+            const filterDate = document.getElementById('filter-date').value;
+            const filterSelect = document.getElementById('filter-select');
+            const selectedValue = filterSelect ? filterSelect.value : '';
+            
+            const type = '7days';
+            
+            // 获取当前标签页的名称
+            const tabNames = {
+                'sensor': '传感器数据',
+                'device': '设备状态',
+                'vehicle': '车辆数据',
+                'login': '登录日志',
+                'ai': 'AI分析',
+                'system': '系统日志',
+                'pictrue': '监控图片'
+            };
+            
+            let tabName = tabNames[currentTab] || '所有数据';
+            let filterText = selectedValue ? `【${selectedValue}】` : '';
+            
+            const confirmMsg = `确定要清除最近7天（截至${filterDate}）的${tabName}${filterText}吗？\n此操作不可恢复！`;
+            
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+            
+            try {
+                const params = new URLSearchParams();
+                params.append('type', type);
+                params.append('date', filterDate);
+                if (selectedValue) {
+                    params.append('filter_value', selectedValue);
+                }
+                params.append('current_tab', currentTab);
+                
+                const response = await fetch(`${API_BASE}/cleanup`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: params
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`成功清除 ${result.count} 条数据`);
+                    loadData();
+                    loadStats(); // 刷新统计数据
+                } else {
+                    alert('清除数据失败：' + (result.message || '未知错误'));
+                }
+            } catch (error) {
+                alert('清除数据失败：网络错误');
+                console.error('清除数据失败:', error);
+            }
+        }
+
+        async function loadData() {
+            const content = document.getElementById('data-content');
+            content.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>正在加载数据...</p></div>';
+
+            try {
+                const config = tabConfigs[currentTab];
+                const baseUrl = API_BASE;
+                let url = `${baseUrl}${config.api}`;
+
+                // 区块链使用相同的时间筛选参数
+                if (currentTab === 'blockchain') {
+                    const filterDate = document.getElementById('filter-date')?.value || '';
+                    const filterHour = document.getElementById('filter-hour')?.value || '';
+                    let bcUrl = url;
+                    const bcParams = [];
+                    if (filterDate) bcParams.push(`start_date=${encodeURIComponent(filterDate)}`);
+                    if (filterDate) bcParams.push(`end_date=${encodeURIComponent(filterDate)}`);
+                    if (filterHour) bcParams.push(`start_hour=${encodeURIComponent(filterHour)}`);
+                    if (bcParams.length) bcUrl += '?' + bcParams.join('&');
+                    const response = await fetch(bcUrl);
+                    const result = await response.json();
+                    if (result.success && result.data.length > 0) {
+                        content.innerHTML = renderTable(result.data, config.columns);
+                    } else {
+                        content.innerHTML = '<div class="empty-state">📭 暂无区块链存证记录，请访问溯源页面后自动生成</div>';
+                    }
+                    return;
+                }
+
+                const filterDate = document.getElementById('filter-date').value;
+                const filterHour = document.getElementById('filter-hour').value;
+                const filterSelect = document.getElementById('filter-select');
+                const selectedValue = filterSelect ? filterSelect.value : '';
+
+                const params = new URLSearchParams();
+                
+                if (filterDate) {
+                    const [year, month, day] = filterDate.split('-');
+                    if (filterHour !== '') {
+                        const pad = (n) => String(n).padStart(2, '0');
+                        const startHour = pad(parseInt(filterHour));
+                        const endHourNum = (parseInt(filterHour) + 1) % 24;
+                        const endHour = pad(endHourNum);
+                        params.append('start_time', `${year}-${month}-${day}T${startHour}:00:00`);
+                        params.append('end_time', `${year}-${month}-${day}T${endHour}:00:59`);
+                    } else {
+                        params.append('start_time', `${year}-${month}-${day}T00:00:00`);
+                        params.append('end_time', `${year}-${month}-${day}T23:59:59`);
+                    }
+                }
+                
+                if (selectedValue) {
+                    if (currentTab === 'sensor') {
+                        params.append('sensor_type', selectedValue);
+                    } else if (currentTab === 'device') {
+                        params.append('device_name', selectedValue);
+                    } else if (currentTab === 'vehicle') {
+                        params.append('vehicle_number', selectedValue);
+                    } else if (currentTab === 'system') {
+                        params.append('module', selectedValue);
+                    }
+                }
+
+                // 图片阶段筛选
+                const stageInput = document.getElementById('filter-stage');
+                if (stageInput && stageInput.value) {
+                    params.append('stage', stageInput.value);
+                }
+
+                const response = await fetch(`${baseUrl}${config.api}?${params}`);
+                const result = await response.json();
+
+                if (result.success && result.data.length > 0) {
+                    content.innerHTML = renderTable(result.data, config.columns);
+                } else {
+                    content.innerHTML = '<div class="empty-state">📭 暂无数据</div>';
+                }
+            } catch (error) {
+                content.innerHTML = '<div class="empty-state">❌ 加载数据失败</div>';
+                console.error('加载数据失败:', error);
+            }
+        }
+
+        function renderTable(data, columns) {
+            return `<table class="table-floating">
+                <thead><tr>${columns.map(c => `<th>${c.name}</th>`).join('')}</tr></thead>
+                <tbody>${data.map(row => `<tr>${columns.map(c => {
+                    if (c.field === '_action') {
+                        // 操作列：图片查看、下载和删除按钮
+                        if (currentTab === 'pictrue') {
+                            return `<td style="white-space: nowrap;">
+                                <a href="${API_BASE}/pictrue/${row.id}" target="_blank" class="action-link action-link-view">🖼️ 查看</a>
+                                <a href="javascript:void(0)" onclick="downloadSingleImage(${row.id}, '${row.filename || '图片_' + row.id + '.jpg'}')" class="action-link action-link-download">⬇️ 下载</a>
+                                <a href="javascript:void(0)" onclick="deleteImage(${row.id})" class="action-link action-link-delete">🗑️ 删除</a>
+                            </td>`;
+                        }
+                        return '<td>-</td>';
+                    }
+                    if (c.field === '_verify') {
+                        return `<td><button class="btn btn-small btn-gradient" onclick="verifyBlockchain(${row.id})" style="padding:3px 12px;font-size:12px">🔐 验证</button></td>`;
+                    }
+                    if (c.field === 'md5_hash') {
+                        return `<td style="font-family:'Courier New',monospace;font-size:11px;color:#58a6ff;letter-spacing:0.5px">${row[c.field]}</td>`;
+                    }
+                    if (c.field === 'raw_material') {
+                        return `<td style="font-family:'Courier New',monospace;font-size:11px;max-width:280px;word-break:break-all;color:var(--text-muted)">${row[c.field]}</td>`;
+                    }
+                    return `<td>${formatValue(row[c.field], c.field)}</td>`;
+                }).join('')}</tr>`).join('')}</tbody>
+            </table>`;
+        }
+
+        function formatValue(value, column) {
+            if (value === null || value === undefined) return '-';
+            
+            if (column === 'status') {
+                let cls = 'badge-info';
+                let displayValue = value;
+                if (value === 'success' || value === 'online') {
+                    cls = 'badge-success';
+                    displayValue = '成功';
+                }
+                if (value === 'error' || value === 'failed') {
+                    cls = 'badge-danger';
+                    displayValue = '失败';
+                }
+                if (value === 'offline') {
+                    cls = 'badge-danger';
+                    displayValue = '离线';
+                }
+                if (value === 'warning') {
+                    cls = 'badge-warning';
+                    displayValue = '警告';
+                }
+                return `<span class="badge ${cls}">${displayValue}</span>`;
+            }
+            
+            if (column === 'risk_level') {
+                let cls = 'badge-success';
+                let displayValue = value;
+                if (value === 'medium') {
+                    cls = 'badge-warning';
+                    displayValue = '中等';
+                }
+                if (value === 'high') {
+                    cls = 'badge-danger';
+                    displayValue = '高';
+                }
+                return `<span class="badge ${cls}">${displayValue}</span>`;
+            }
+
+            if (column === 'log_type') {
+                let cls = 'badge-info';
+                let displayValue = value;
+                if (value === 'warning') {
+                    cls = 'badge-warning';
+                    displayValue = '警告';
+                }
+                if (value === 'error') {
+                    cls = 'badge-danger';
+                    displayValue = '错误';
+                }
+                if (value === 'info') {
+                    displayValue = '信息';
+                }
+                return `<span class="badge ${cls}">${displayValue}</span>`;
+            }
+
+            if (column === 'analysis_type') {
+                if (value === 'environment') return '环境分析';
+                return value;
+            }
+
+            if (column === 'door_status') {
+                if (value === 'closed') return '关闭';
+                if (value === 'open') return '打开';
+                return value;
+            }
+
+            if (column === 'module') {
+                if (value === 'platform') return '平台';
+                return value;
+            }
+
+            if (column === 'filesize') {
+                if (!value || value === 0) return '未知';
+                if (value < 1024) return value + 'B';
+                if (value < 1024 * 1024) return (value / 1024).toFixed(1) + 'KB';
+                return (value / (1024 * 1024)).toFixed(1) + 'MB';
+            }
+
+            if (column === 'stage') {
+                const stageMap = {
+                    'seedling': { label: '育苗期', cls: 'badge-success' },
+                    'grow': { label: '生长开花期', cls: 'badge-info' },
+                    'harvest': { label: '采收期', cls: 'badge-danger' },
+                    'other': { label: '其他', cls: 'badge-info' },
+                    'unknown': { label: '未识别', cls: 'badge-warning' }
+                };
+                const info = stageMap[value] || { label: value || '未知', cls: 'badge-info' };
+                return `<span class="badge ${info.cls}">${info.label}</span>`;
+            }
+
+            if (column === 'action') {
+                if (value === 'connect') return '连接';
+                if (value === 'login') return '登录';
+                if (value === 'logout') return '登出';
+                return value;
+            }
+
+            if (column.includes('time') || column.includes('_time') || column === 'created_at') {
+                try {
+                    const date = new Date(value);
+                    if (!isNaN(date.getTime())) {
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        const hours = String(date.getHours()).padStart(2, '0');
+                        const minutes = String(date.getMinutes()).padStart(2, '0');
+                        const seconds = String(date.getSeconds()).padStart(2, '0');
+                        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+                    }
+                } catch (e) {
+                    console.error('时间格式化失败:', e);
+                }
+            }
+
+            return value;
+        }
+
+        // ========== 区块链查询 ==========
+        async function loadBlockchain() {
+            const content = document.getElementById('data-content');
+            content.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>正在加载区块链记录...</p></div>';
+            try {
+                const startDate = document.getElementById('bc-start-date')?.value || '';
+                const endDate = document.getElementById('bc-end-date')?.value || '';
+                let url = `${API_BASE}/blockchain`;
+                const params = [];
+                if (startDate) params.push(`start_date=${encodeURIComponent(startDate)}`);
+                if (endDate) params.push(`end_date=${encodeURIComponent(endDate)}`);
+                if (params.length) url += '?' + params.join('&');
+
+                const response = await fetch(url);
+                const result = await response.json();
+                const totalEl = document.getElementById('bc-total-count');
+                if (result.success) {
+                    if (totalEl) totalEl.textContent = `共 ${result.total || result.data.length} 条记录`;
+                    if (result.data.length > 0) {
+                        content.innerHTML = renderTable(result.data, tabConfigs.blockchain.columns);
+                    } else {
+                        content.innerHTML = '<div class="empty-state">📭 暂无存证记录，请访问溯源页面后自动生成</div>';
+                    }
+                } else {
+                    content.innerHTML = '<div class="empty-state">❌ ' + (result.message || '加载失败') + '</div>';
+                }
+            } catch (error) {
+                content.innerHTML = '<div class="empty-state">❌ 加载失败，请检查网络连接</div>';
+                console.error('区块链加载失败:', error);
+            }
+        }
+
+        async function verifyBlockchain(recordId) {
+            try {
+                const response = await fetch(`${API_BASE}/blockchain/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ record_id: recordId })
+                });
+                const result = await response.json();
+                // 关闭之前的弹窗
+                const oldOverlay = document.getElementById('blockchain-verify-overlay');
+                if (oldOverlay) oldOverlay.remove();
+
+                // 创建遮罩层
+                const overlay = document.createElement('div');
+                overlay.id = 'blockchain-verify-overlay';
+                overlay.style.cssText = `
+                    position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;
+                    background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;
+                    animation:fadeIn 0.2s ease;
+                `;
+                overlay.onclick = function(e) {
+                    if (e.target === overlay) overlay.remove();
+                };
+
+                let contentHtml = '';
+                if (result.success) {
+                    const d = result.data;
+                    const matchText = d.match ? '✅ 验证通过 · 哈希完全匹配，数据未被篡改' : '❌ 验证失败 · 哈希不匹配';
+                    const matchColor = d.match ? '#2e7d32' : '#c62828';
+                    const matchBg = d.match ? 'rgba(46,125,50,0.08)' : 'rgba(198,40,40,0.08)';
+                    const matchBorder = d.match ? 'rgba(46,125,50,0.2)' : 'rgba(198,40,40,0.2)';
+                    contentHtml = `
+                        <div style="background:var(--card-bg,#1a1a2e);border:1px solid ${matchBorder};border-radius:16px;padding:24px 28px;max-width:520px;width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:slideUp 0.25s ease;position:relative">
+                            <button onclick="this.closest('#blockchain-verify-overlay').remove()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-muted,#888);font-size:22px;cursor:pointer;line-height:1">&times;</button>
+                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+                                <span style="font-weight:700;font-size:16px;color:${matchColor}">${matchText}</span>
+                                <span style="font-size:12px;color:var(--text-muted,#888);margin-left:auto">存证 #${d.id} · ${d.proof_code}</span>
+                            </div>
+                            <table style="width:100%;border-collapse:collapse;font-size:13px">
+                                <tr><td style="padding:6px 8px;color:var(--text-muted,#888);width:80px;white-space:nowrap">拼接原文</td><td style="padding:6px 8px;font-family:'Courier New',monospace;font-size:12px;word-break:break-all;color:var(--text,#ccc)">${d.raw_material}</td></tr>
+                                <tr><td style="padding:6px 8px;color:var(--text-muted,#888)">存储哈希</td><td style="padding:6px 8px;font-family:'Courier New',monospace;font-size:12px;color:#58a6ff;word-break:break-all">${d.stored_hash}</td></tr>
+                                <tr><td style="padding:6px 8px;color:var(--text-muted,#888)">计算哈希</td><td style="padding:6px 8px;font-family:'Courier New',monospace;font-size:12px;color:${matchColor};word-break:break-all">${d.computed_hash}</td></tr>
+                            </table>
+                            <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.08);text-align:center;font-size:12px;color:${matchColor}">
+                                MD5(${d.raw_material}) = ${d.computed_hash}${d.match ? ' ✓' : ' ✗'}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    contentHtml = `
+                        <div style="background:var(--card-bg,#1a1a2e);border:1px solid rgba(198,40,40,0.2);border-radius:16px;padding:24px 28px;max-width:400px;width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:slideUp 0.25s ease;position:relative;text-align:center">
+                            <button onclick="this.closest('#blockchain-verify-overlay').remove()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-muted,#888);font-size:22px;cursor:pointer;line-height:1">&times;</button>
+                            <div style="font-size:48px;margin-bottom:12px">❌</div>
+                            <div style="color:#c62828;font-size:16px;font-weight:600;margin-bottom:6px">验证失败</div>
+                            <div style="color:var(--text-muted,#888);font-size:13px">${(result.message || '未知错误')}</div>
+                        </div>
+                    `;
+                }
+                overlay.innerHTML = contentHtml;
+                document.body.appendChild(overlay);
+            } catch (error) {
+                // 遮罩显示错误
+                const overlay = document.createElement('div');
+                overlay.id = 'blockchain-verify-overlay';
+                overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;';
+                overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+                let msg = '网络错误';
+                if (error instanceof TypeError && error.message.includes('fetch')) msg = '无法连接到服务器';
+                else if (error instanceof SyntaxError) msg = '服务器返回数据格式异常';
+                else msg = error.message || '网络错误';
+                overlay.innerHTML = `
+                    <div style="background:var(--card-bg,#1a1a2e);border:1px solid rgba(198,40,40,0.2);border-radius:16px;padding:24px 28px;max-width:400px;width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.5);position:relative;text-align:center">
+                        <button onclick="this.closest('#blockchain-verify-overlay').remove()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-muted,#888);font-size:22px;cursor:pointer;line-height:1">&times;</button>
+                        <div style="font-size:48px;margin-bottom:12px">⚠️</div>
+                        <div style="color:#c62828;font-size:16px;font-weight:600;margin-bottom:6px">验证失败</div>
+                        <div style="color:var(--text-muted,#888);font-size:13px">${msg}</div>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+                console.error('验证失败:', error);
+            }
+        }
+
+        // ========== 导出功能 ==========
+
+        const sensorOptionsList = [
+            { value: 's_temp', label: '幼苗区_温度' },
+            { value: 's_hum', label: '幼苗区_湿度' },
+            { value: 's_lx', label: '幼苗区_光照' },
+            { value: 's_sox', label: '幼苗区_有害气体' },
+            { value: 'e_tamb', label: '种植区_环境温度' },
+            { value: 'e_ah', label: '种植区_环境湿度' },
+            { value: 'e_tvoc', label: '种植区_空气质量' },
+            { value: 'e_bt', label: '种植区_人体感应' },
+            { value: 'e_pm', label: '种植区_PM2.5' },
+            { value: 'e_patm', label: '种植区_大气压' },
+            { value: 'ws', label: '种植区_风速' },
+            { value: 'p_temp', label: '种植区_土壤温度' },
+            { value: 'p_hum', label: '种植区_土壤湿度' },
+            { value: 'p_ph', label: '种植区_土壤PH' },
+            { value: 'p_N', label: '种植区_土壤氮' },
+            { value: 'p_P', label: '种植区_土壤磷' },
+            { value: 'p_K', label: '种植区_土壤钾' },
+            { value: 'd_temp', label: '烘干区_温度' },
+            { value: 'd_hum', label: '烘干区_湿度' },
+            { value: 'w_ll', label: '蓄水区_液位' },
+            { value: 'r_temp', label: '冷链_温度' },
+            { value: 'r_hum', label: '冷链_湿度' },
+            { value: 'r_co2', label: '冷链_CO2' }
+        ];
+
+        // ========== 导出功能（使用页面已有筛选值） ==========
+
+        /** 判断是否为小时模式：页面小时下拉框有选中值 */
+        function isHourMode() {
+            const h = document.getElementById('filter-hour');
+            return h && h.value !== '';
+        }
+
+        function getFilterDate() {
+            return document.getElementById('filter-date')?.value || '';
+        }
+
+        function getFilterHour() {
+            return document.getElementById('filter-hour')?.value || '';
+        }
+
+        function getFilterValue() {
+            const sel = document.getElementById('filter-select');
+            return sel ? sel.value : '';
+        }
+
+        // --- 传感器折线图导出 ---
+
+        async function exportSensorChart() {
+            const sensorType = getFilterValue();
+            const date = getFilterDate();
+            const hour = getFilterHour();
+            const mode = isHourMode() ? 'hour' : 'day';
+
+            if (!sensorType) { alert('请先在筛选器中选择一个传感器类型'); return; }
+            if (!date) { alert('请选择日期'); return; }
+            if (mode === 'hour' && !hour) { alert('请选择小时'); return; }
+
+            const sensorLabel = sensorOptionsList.find(o => o.value === sensorType)?.label || sensorType;
+
+            try {
+                let dataPoints;
+
+                if (mode === 'day') {
+                    dataPoints = [];
+                    for (let h = 0; h < 24; h++) {
+                        const hs = String(h).padStart(2, '0');
+                        const s = `${date}T${hs}:00:00`;
+                        const e = h < 23 ? `${date}T${String(h + 1).padStart(2, '0')}:00:00` : `${date}T23:59:59`;
+                        dataPoints.push({ label: `${hs}:00`, start: s, end: e });
+                    }
+                } else {
+                    dataPoints = [];
+                    for (let m = 0; m < 60; m += 6) {
+                        const ms = String(m).padStart(2, '0');
+                        const me = String(Math.min(m + 5, 59)).padStart(2, '0');
+                        dataPoints.push({ label: `${hour}:${ms}`, start: `${date}T${hour}:${ms}:00`, end: `${date}T${hour}:${me}:59` });
+                    }
+                }
+
+                // 查询各时间段数据
+                const values = [];
+                for (const dp of dataPoints) {
+                    const params = new URLSearchParams();
+                    params.append('sensor_type', sensorType);
+                    params.append('start_time', dp.start);
+                    params.append('end_time', dp.end);
+                    params.append('limit', '1000');
+                    const resp = await fetch(`${API_BASE}/sensor/data?${params}`);
+                    const result = await resp.json();
+                    if (result.success && result.data.length > 0) {
+                        const sum = result.data.reduce((a, b) => a + parseFloat(b.value || 0), 0);
+                        values.push(sum / result.data.length);
+                    } else {
+                        values.push(null);
+                    }
+                }
+
+                const labels = [];
+                const chartValues = [];
+                const unit = sensorLabel.includes('温度') ? '°C' :
+                             sensorLabel.includes('湿度') ? '%' :
+                             sensorLabel.includes('光照') ? 'Lux' :
+                             sensorLabel.includes('CO2') ? 'ppm' : '';
+
+                for (let i = 0; i < dataPoints.length; i++) {
+                    if (values[i] !== null) {
+                        labels.push(dataPoints[i].label);
+                        chartValues.push(values[i]);
+                    }
+                }
+
+                if (chartValues.length === 0) { alert('该时间段内没有传感器数据'); return; }
+
+                // 绘制图表并导出
+                const canvas = document.getElementById('export-chart-canvas');
+                const ctx = canvas.getContext('2d');
+                if (window._exportChart) window._exportChart.destroy();
+                canvas.width = 900;
+                canvas.height = 500;
+
+                // 创建渐变填充（数据区域）
+                const gradient = ctx.createLinearGradient(0, 0, 0, 500);
+                gradient.addColorStop(0, 'rgba(0, 245, 255, 0.35)');
+                gradient.addColorStop(0.4, 'rgba(123, 66, 255, 0.15)');
+                gradient.addColorStop(1, 'rgba(0, 245, 255, 0.01)');
+
+                // 自定义背景插件 - 绘制监控平台同款科技背景
+                const bgPlugin = {
+                    id: 'customTechBackground',
+                    beforeDraw: (chart) => {
+                        const c = chart.ctx;
+                        const w = chart.width;
+                        const h = chart.height;
+                        // 主体渐变背景
+                        const bg = c.createLinearGradient(0, 0, w, h);
+                        bg.addColorStop(0, '#020408');
+                        bg.addColorStop(0.5, '#050811');
+                        bg.addColorStop(1, '#0a0e17');
+                        c.fillStyle = bg;
+                        c.fillRect(0, 0, w, h);
+                        // 左下角青色辉光
+                        const glow1 = c.createRadialGradient(w * 0.2, h * 0.8, 0, w * 0.2, h * 0.8, h * 0.8);
+                        glow1.addColorStop(0, 'rgba(0, 245, 255, 0.12)');
+                        glow1.addColorStop(1, 'transparent');
+                        c.fillStyle = glow1;
+                        c.fillRect(0, 0, w, h);
+                        // 右上角紫色辉光
+                        const glow2 = c.createRadialGradient(w * 0.8, h * 0.2, 0, w * 0.8, h * 0.2, h * 0.7);
+                        glow2.addColorStop(0, 'rgba(126, 66, 255, 0.12)');
+                        glow2.addColorStop(1, 'transparent');
+                        c.fillStyle = glow2;
+                        c.fillRect(0, 0, w, h);
+                        // 中心淡淡红色辉光
+                        const glow3 = c.createRadialGradient(w * 0.4, h * 0.4, 0, w * 0.4, h * 0.4, h * 0.5);
+                        glow3.addColorStop(0, 'rgba(255, 42, 109, 0.06)');
+                        glow3.addColorStop(1, 'transparent');
+                        c.fillStyle = glow3;
+                        c.fillRect(0, 0, w, h);
+                        // 描边边框
+                        c.strokeStyle = 'rgba(0, 245, 255, 0.15)';
+                        c.lineWidth = 1;
+                        c.strokeRect(0.5, 0.5, w - 1, h - 1);
+                    }
+                };
+
+                window._exportChart = new Chart(ctx, {
+                    type: 'line',
+                    plugins: [bgPlugin],
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: `${sensorLabel} ${unit ? '(' + unit + ')' : ''}`,
+                            data: chartValues,
+                            borderColor: '#00f5ff',
+                            backgroundColor: gradient,
+                            borderWidth: 2.5,
+                            borderJoin: 'round',
+                            pointBackgroundColor: '#7b42ff',
+                            pointBorderColor: '#00f5ff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5,
+                            pointHoverRadius: 8,
+                            pointHoverBackgroundColor: '#00f5ff',
+                            pointHoverBorderColor: '#ffffff',
+                            fill: true,
+                            tension: 0
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        layout: {
+                            padding: { top: 20, bottom: 20, left: 20, right: 20 }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: `${sensorLabel} - ${date}${mode === 'hour' ? ' ' + hour + '时' : ''} 数据趋势`,
+                                color: '#00f5ff',
+                                font: { size: 20, weight: 'bold' },
+                                padding: { bottom: 20 }
+                            },
+                            legend: {
+                                labels: {
+                                    color: '#88ccff',
+                                    font: { size: 13 },
+                                    usePointStyle: true,
+                                    padding: 15
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: '时间',
+                                    color: '#88ccff',
+                                    font: { size: 13 }
+                                },
+                                ticks: {
+                                    color: '#88ccff',
+                                    font: { size: 11 },
+                                    maxRotation: 45
+                                },
+                                grid: {
+                                    color: 'rgba(0, 245, 255, 0.08)',
+                                    drawBorder: false,
+                                    drawTicks: false
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: `${sensorLabel} ${unit ? '(' + unit + ')' : ''}`,
+                                    color: '#88ccff',
+                                    font: { size: 13 }
+                                },
+                                ticks: {
+                                    color: '#88ccff',
+                                    font: { size: 11 }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 245, 255, 0.12)',
+                                    drawBorder: false
+                                },
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                });
+
+                await new Promise(r => setTimeout(r, 500));
+                const link = document.createElement('a');
+                link.download = `${sensorLabel}_${date}${mode === 'hour' ? '_' + hour + '时' : ''}_趋势图.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                alert('折线图导出成功！');
+            } catch (error) {
+                console.error('导出折线图失败:', error);
+                alert('导出折线图失败：' + error.message);
+            }
+        }
+
+        // --- 单张图片下载 ---
+
+        async function downloadSingleImage(id, filename) {
+            try {
+                const resp = await fetch(`${API_BASE}/pictrue/${id}`);
+                const blob = await resp.blob();
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename || `图片_${id}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('下载图片失败:', error);
+                alert('下载图片失败：' + error.message);
+            }
+        }
+
+        // --- 单张图片删除 ---
+
+        async function deleteImage(id) {
+            if (!confirm(`确定要删除图片 #${id} 吗？此操作不可恢复！`)) {
+                return;
+            }
+            try {
+                const resp = await fetch(`${API_BASE}/pictrue/${id}`, { method: 'DELETE' });
+                const result = await resp.json();
+                if (result.success) {
+                    alert(`图片 #${id} 已删除`);
+                    loadData(); // 刷新表格
+                } else {
+                    alert('删除失败：' + (result.message || '未知错误'));
+                }
+            } catch (error) {
+                console.error('删除图片失败:', error);
+                alert('删除图片失败：' + error.message);
+            }
+        }
+
+        // --- 图片批量下载 ---
+
+        async function exportPictures() {
+            const date = getFilterDate();
+            const hour = getFilterHour();
+            const mode = isHourMode() ? 'hour' : 'day';
+
+            if (!date) { alert('请选择日期'); return; }
+            if (mode === 'hour' && !hour) { alert('请选择小时'); return; }
+
+            const confirmMsg = mode === 'day'
+                ? `确定要下载 ${date} 这一天的所有监控图片吗？`
+                : `确定要下载 ${date} ${hour}时的所有监控图片吗？`;
+            if (!confirm(confirmMsg)) return;
+
+            try {
+                let startTime = mode === 'day' ? `${date}T00:00:00` : `${date}T${hour}:00:00`;
+                let endTime = mode === 'day' ? `${date}T23:59:59` : `${date}T${hour}:59:59`;
+
+                const params = new URLSearchParams();
+                params.append('start_time', startTime);
+                params.append('end_time', endTime);
+                params.append('limit', '500');
+
+                const resp = await fetch(`${API_BASE}/pictrue?${params}`);
+                const result = await resp.json();
+
+                if (!result.success || !result.data || result.data.length === 0) {
+                    alert('该时间段内没有图片');
+                    return;
+                }
+
+                const images = result.data;
+                if (images.length === 1) {
+                    const link = document.createElement('a');
+                    link.href = `${API_BASE}/pictrue/${images[0].id}`;
+                    link.download = images[0].filename || `图片_${images[0].id}.jpg`;
+                    link.click();
+                } else {
+                    const zip = new JSZip();
+                    for (const img of images) {
+                        try {
+                            const imgResp = await fetch(`${API_BASE}/pictrue/${img.id}`);
+                            const blob = await imgResp.blob();
+                            zip.file(img.filename || `图片_${img.id}.jpg`, blob);
+                        } catch (e) {
+                            console.warn(`下载图片 ${img.id} 失败:`, e);
+                        }
+                    }
+                    const zipBlob = await zip.generateAsync({ type: 'blob' });
+                    saveAs(zipBlob, `监控图片_${date}${mode === 'hour' ? '_' + hour + '时' : ''}.zip`);
+                }
+                alert(`成功下载 ${images.length} 张图片`);
+            } catch (error) {
+                console.error('下载图片失败:', error);
+                alert('下载图片失败：' + error.message);
+            }
+        }
+
+        // --- XLS导出 ---
+
+        async function fetchExportData(startTime, endTime, filterValue) {
+            const config = tabConfigs[currentTab];
+            const params = new URLSearchParams();
+            params.append('start_time', startTime);
+            params.append('end_time', endTime);
+            params.append('limit', '10000');
+            if (filterValue) {
+                if (currentTab === 'sensor') params.append('sensor_type', filterValue);
+                else if (currentTab === 'device') params.append('device_name', filterValue);
+                else if (currentTab === 'vehicle') params.append('vehicle_number', filterValue);
+                else if (currentTab === 'system') params.append('module', filterValue);
+            }
+            const resp = await fetch(`${API_BASE}${config.api}?${params}`);
+            const result = await resp.json();
+            return result.success ? result.data : [];
+        }
+
+        async function exportToXLS() {
+            const date = getFilterDate();
+            const hour = getFilterHour();
+            const filterValue = getFilterValue();
+            const mode = isHourMode() ? 'hour' : 'day';
+
+            if (!date) { alert('请选择日期'); return; }
+            if (mode === 'hour' && !hour) { alert('请选择小时'); return; }
+
+            try {
+                const tabNames = {
+                    'login': '登录日志', 'sensor': '传感器数据', 'device': '设备状态',
+                    'ai': 'AI分析', 'vehicle': '车辆数据', 'system': '系统日志', 'pictrue': '监控图片'
+                };
+                const tabName = tabNames[currentTab] || '数据';
+                const config = tabConfigs[currentTab];
+
+                let startTime, endTime, sheetName;
+                if (mode === 'day') {
+                    startTime = `${date}T00:00:00`;
+                    endTime = `${date}T23:59:59`;
+                    sheetName = `${tabName}_${date}`;
+                } else {
+                    startTime = `${date}T${hour}:00:00`;
+                    endTime = `${date}T${hour}:59:59`;
+                    sheetName = `${tabName}_${date}_${hour}时`;
+                }
+
+                const allData = await fetchExportData(startTime, endTime, filterValue);
+
+                if (!allData || allData.length === 0) {
+                    alert('没有数据可以导出');
+                    return;
+                }
+
+                const headers = config.columns.filter(c => c.field !== '_action').map(c => c.name);
+                const rows = allData.map(row => {
+                    return config.columns.filter(c => c.field !== '_action').map(c => {
+                        let val = row[c.field];
+                        return (val === null || val === undefined) ? '' : String(val);
+                    });
+                });
+
+                const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+                ws['!cols'] = headers.map(() => ({ wch: 20 }));
+
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, sheetName.slice(0, 31));
+
+                const fileName = `${tabName}_${date}${mode === 'hour' ? '_' + hour + '时' : ''}.xlsx`;
+                XLSX.writeFile(wb, fileName);
+
+                alert(`成功导出 ${allData.length} 条数据到 ${fileName}`);
+            } catch (error) {
+                console.error('导出XLS失败:', error);
+                alert('导出XLS失败：' + error.message);
+            }
+        }
+
+    </script>
+</body>
+</html>

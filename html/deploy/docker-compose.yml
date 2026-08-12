@@ -1,0 +1,120 @@
+services:
+  mariadb:
+    image: mariadb:11.4
+    container_name: qjzl-mariadb
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: qjzl
+      MARIADB_USER: qjzl
+      MARIADB_PASSWORD: qjzl123456
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ../qjzl/sql/database.sql:/docker-entrypoint-initdb.d/01-init.sql
+
+  node:
+    image: node:18-alpine
+    container_name: qjzl-node
+    network_mode: host
+    restart: unless-stopped
+    working_dir: /app
+    command: sh -c "npm install && node server.js"
+    environment:
+      # 数据库配置(与mariadb服务保持一致)
+      DB_HOST: localhost
+      DB_PORT: 3306
+      DB_USER: qjzl
+      DB_PASSWORD: qjzl123456
+      DB_NAME: qjzl
+      # ---------- 冷链监控页面(lenglian.html)前端配置 ----------
+      # 高德地图Web JS API Key(高德控制台申请,需配置安全域名白名单)
+      AMAP_KEY: ${AMAP_KEY:-}
+      # 新物联云平台账号(与 nlecloud-sdk 登录配套使用)
+      CLOUD_ACCOUNT: ${CLOUD_ACCOUNT:-}
+      CLOUD_PASSWORD: ${CLOUD_PASSWORD:-}
+      CLOUD_POLLING_INTERVAL: ${CLOUD_POLLING_INTERVAL:-10000}
+    volumes:
+      - ../qjzl/server:/app
+
+  ai:
+    image: python:3.12-alpine
+    container_name: qjzl-ai
+    network_mode: host
+    restart: unless-stopped
+    working_dir: /app
+    command: sh -c "pip install flask flask-cors requests python-dotenv && python AI.py"
+    environment:
+      DB_HOST: localhost
+      DB_PORT: 3306
+      DB_USER: qjzl
+      DB_PASSWORD: qjzl123456
+      DB_NAME: qjzl
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+    volumes:
+      - ../Android_AI:/app
+
+  disease:
+    image: python:3.12-alpine
+    container_name: qjzl-disease
+    network_mode: host
+    restart: unless-stopped
+    working_dir: /app
+    command: sh -c "pip install flask flask-cors requests python-dotenv pymysql && python disease_recognition.py"
+    environment:
+      DB_HOST: localhost
+      DB_PORT: 3306
+      DB_USER: qjzl
+      DB_PASSWORD: qjzl123456
+      DB_NAME: qjzl
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+    volumes:
+      - ../Android_AI:/app
+
+  trace:
+    image: python:3.12-alpine
+    container_name: qjzl-trace
+    network_mode: host
+    restart: unless-stopped
+    working_dir: /app
+    command: sh -c "pip install flask flask-cors qrcode Pillow pymysql requests && python trac.py"
+    environment:
+      DB_HOST: localhost
+      DB_PORT: 3306
+      DB_USER: qjzl
+      DB_PASSWORD: qjzl123456
+      DB_NAME: qjzl
+      SERVER_IP: ${SERVER_IP:-}
+    volumes:
+      - ../trac:/app
+
+  rtsp:
+    image: python:3.12-alpine
+    container_name: qjzl-rtsp
+    network_mode: host
+    restart: unless-stopped
+    working_dir: /app
+    command: sh -c "pip install --quiet flask flask-cors numpy requests opencv-python-headless && python rtsp_server.py"
+    environment:
+      DB_HOST: localhost
+      DB_PORT: 3306
+      DB_USER: qjzl
+      DB_PASSWORD: qjzl123456
+      DB_NAME: qjzl
+      CAMERA_IP: ${CAMERA_IP:-}
+      CAMERA_PORT: ${CAMERA_PORT:-80}
+      CAMERA_USER: ${CAMERA_USER:-}
+      CAMERA_PASSWORD: ${CAMERA_PASSWORD:-}
+    volumes:
+      - ../qjzl/rtsp_server.py:/app/rtsp_server.py
+
+  httpd:
+    image: httpd:alpine
+    container_name: qjzl-httpd
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ../:/usr/local/apache2/htdocs:ro
+      - ./httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
+volumes:
+  mariadb_data:

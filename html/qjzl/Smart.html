@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>辣椒产业数据管理平台</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/floating-panel.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/nlecloud-sdk.js"></script>
+    <script src="js/nlecloud-sdk.min.js"></script>
+    <script src="js/ai-predict.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const config = sessionStorage.getItem('platformConfig');
+            if (!config) {
+                console.log('未检测到登录配置，显示配置页面...');
+            } else {
+                console.log('检测到登录配置，准备自动连接...');
+            }
+        });
+    </script>
+    <script src="js/script.js"></script>
+    <style>
+
+        /* 只针对平台连接状态面板移除滚动，平铺显示 */
+        .status-panel {
+            overflow: visible !important;
+            height: auto !important;
+            max-height: none !important;
+        }
+        
+        /* 平台连接状态网格布局 - 拉长铺满 */
+        .status-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 12px !important;
+            width: 100% !important;
+        }
+        
+        /* 状态项拉长铺满 */
+        .status-item {
+            flex: 1 !important;
+            min-height: 120px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+        }
+        
+        /* 数据大屏风格标题样式 - 科技感标题框 */
+        .embedded-header {
+            background: linear-gradient(180deg, rgba(10, 22, 40, 0.98) 0%, rgba(5, 8, 17, 0.95) 100%);
+            border-radius: 0;
+            padding: 10px 40px;
+            margin: 0;
+            box-shadow: 
+                0 0 30px rgba(0, 245, 255, 0.2),
+                inset 0 0 60px rgba(0, 245, 255, 0.05);
+            border: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .embedded-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary));
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .embedded-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary));
+        }
+
+        /* 左侧副标题 */
+        .header-left-text {
+            flex: 1;
+            text-align: left;
+            position: relative;
+        }
+
+        .header-left-text::before {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 30px;
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            border-radius: 2px;
+        }
+
+        .header-left-text p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--primary);
+            letter-spacing: 1px;
+            line-height: 1.4;
+        }
+
+        /* 导航按钮 */
+        .nav-left, .nav-right {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-left {
+            justify-content: flex-end;
+            padding-right: 15px;
+        }
+
+        .nav-right {
+            justify-content: flex-start;
+            padding-left: 15px;
+        }
+
+        .nav-btn {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(0, 245, 255, 0.1);
+            border: 1px solid rgba(0, 245, 255, 0.4);
+            border-radius: 8px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 245, 255, 0.2);
+            border-color: rgba(0, 245, 255, 0.7);
+            transform: translateY(-2px);
+        }
+
+        /* 中间标题 */
+        .header-title-box {
+            flex: 2;
+            text-align: center;
+        }
+
+        .header-title-box h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            background: linear-gradient(90deg, var(--primary), #00ff9d, var(--primary));
+            background-size: 100% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 
+                0 0 20px rgba(0, 245, 255, 0.6),
+                0 0 40px rgba(0, 150, 255, 0.3);
+            position: relative;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+
+
+        /* 右侧时间 */
+        .header-right-time {
+            flex: 1;
+            text-align: right;
+        }
+
+        /* 导航链接样式 */
+        .header-left-text a,
+        .header-right-time a {
+            display: inline-block;
+            padding: 5px 15px;
+            background: rgba(0, 245, 255, 0.1);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .header-left-text a:hover,
+        .header-right-time a:hover {
+            background: rgba(0, 245, 255, 0.2);
+            border-color: rgba(0, 245, 255, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .header-right-time .current-time {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #00f5ff;
+            text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+            margin-bottom: 4px;
+        }
+
+        .header-right-time .current-date {
+            font-size: 0.85rem;
+            color: #00f5ff;
+            letter-spacing: 1px;
+        }
+
+        /* AI分析面板样式 */
+        .ai-panel {
+            margin-bottom: 20px;
+            overflow: auto;
+        }
+
+        .ai-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow: auto;
+        }
+
+        .ai-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .ai-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--primary);
+        }
+
+        .ai-btn-disable {
+            background: rgba(255, 42, 109, 0.2);
+            border-color: var(--danger);
+        }
+
+        .ai-btn-disable:hover {
+            background: rgba(255, 42, 109, 0.3);
+        }
+
+        .ai-content {
+            padding: 15px;
+        }
+
+        .ai-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .ai-assessment, .ai-risk, .ai-timestamp {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .ai-label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .ai-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .risk-level {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+
+        .risk-low {
+            background: rgba(0, 255, 157, 0.2);
+            color: #00ff9d;
+            border: 1px solid rgba(0, 255, 157, 0.3);
+        }
+
+        .risk-medium {
+            background: rgba(255, 222, 33, 0.2);
+            color: #ffde21;
+            border: 1px solid rgba(255, 222, 33, 0.3);
+        }
+
+        .risk-high {
+            background: rgba(255, 42, 109, 0.2);
+            color: #ff2a6d;
+            border: 1px solid rgba(255, 42, 109, 0.3);
+        }
+
+        .ai-details {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .ai-section h4 {
+            margin: 0 0 10px 0;
+            color: var(--primary);
+            font-size: 1rem;
+        }
+
+        .ai-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .ai-list li {
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid var(--primary);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .ai-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        /* AI配置面板样式 */
+        .ai-config-panel {
+            margin-bottom: 20px;
+        }
+
+        .ai-config-content {
+            padding: 20px;
+        }
+
+        .ai-config-description {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 245, 255, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .ai-config-description p {
+            margin: 0 0 10px 0;
+            font-size: 0.95rem;
+        }
+
+        .ai-config-description p:last-child {
+            margin-bottom: 0;
+        }
+
+        .ai-config-actions {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .ai-enable-btn {
+            background: linear-gradient(135deg, var(--primary), #9d4dff);
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        /* 通知样式 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            z-index: 10000;
+            max-width: 350px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .notification-success {
+            background: rgba(0, 255, 157, 0.9);
+            color: var(--dark);
+            border-left: 4px solid #00ff9d;
+        }
+
+        .notification-warning {
+            background: rgba(255, 222, 33, 0.9);
+            color: var(--dark);
+            border-left: 4px solid #ffde21;
+        }
+
+        .notification-error {
+            background: rgba(255, 42, 109, 0.9);
+            color: white;
+            border-left: 4px solid #ff2a6d;
+        }
+
+        .notification-info {
+            background: rgba(0, 245, 255, 0.9);
+            color: var(--dark);
+            border-left: 4px solid #00f5ff;
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification-icon {
+            font-size: 1.2rem;
+        }
+
+        .notification-text {
+            flex: 1;
+        }
+
+
+
+        /* Chart.js错误处理相关样式 */
+        .chart-error {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #ff6b6b;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .chart-error-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        /* 调试样式 - 显示错误信息 */
+        .debug-error {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 0, 0, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            z-index: 10001;
+            max-width: 400px;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+
+        /* 设备状态显示样式 */
+        .device-status-panel {
+            margin-bottom: 20px;
+            height: auto;
+        }
+
+        .device-status-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            padding: 8px;
+        }
+
+        .device-status-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 7px 6px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .device-status-item .status-label {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .device-status-item .status-value {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-online {
+            color: #00ff9d;
+        }
+
+        .status-offline {
+            color: #ff2a6d;
+        }
+
+        .device-icon {
+            width: 32px;
+            height: 32px;
+            margin: 0 auto 7px;
+            opacity: 0.85;
+        }
+
+        .camera-panel {
+            margin-top: 20px;
+        }
+
+        .camera-container {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 245, 255, 0.3);
+        }
+
+        #cameraImage {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .camera-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10;
+        }
+
+        .camera-loading p {
+            color: #00f5ff;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .camera-controls .btn {
+            flex: 1;
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+
+        .ptz-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 245, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 245, 255, 0.2);
+        }
+
+        .ptz-row {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .ptz-btn {
+            width: 60px;
+            height: 44px;
+            background: rgba(0, 245, 255, 0.1);
+            border: 1px solid rgba(0, 245, 255, 0.4);
+            border-radius: 8px;
+            color: #00f5ff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            font-weight: bold;
+        }
+
+        .ptz-btn:hover {
+            background: rgba(0, 245, 255, 0.3);
+            border-color: rgba(0, 245, 255, 0.8);
+            transform: scale(1.02);
+        }
+
+        .ptz-btn:active {
+            transform: scale(0.98);
+            background: rgba(0, 245, 255, 0.5);
+        }
+
+        /* .spinner 和 @keyframes spin 已移至 floating-panel.css 使用共享的 .loading-spinner */
+
+        /* ========== 阶段选择弹窗 ========== */
+        .stage-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+        .stage-modal-overlay.active {
+            display: flex;
+        }
+        .stage-modal {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            width: 420px;
+            max-width: 90vw;
+            box-shadow: 0 0 40px rgba(0, 245, 255, 0.15), 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: modalFadeIn 0.25s ease;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .stage-modal-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #00f5ff;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+        .stage-modal-subtitle {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .stage-modal-ai-result {
+            background: rgba(0, 245, 255, 0.08);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 18px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.8);
+        }
+        .stage-modal-ai-result strong {
+            color: #00f5ff;
+        }
+        .stage-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .stage-option {
+            padding: 14px 10px;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.03);
+            color: #fff;
+            font-size: 0.95rem;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .stage-option:hover {
+            border-color: rgba(0, 245, 255, 0.5);
+            background: rgba(0, 245, 255, 0.08);
+        }
+        .stage-option.selected {
+            border-color: #00f5ff;
+            background: rgba(0, 245, 255, 0.15);
+            box-shadow: 0 0 15px rgba(0, 245, 255, 0.2);
+        }
+        .stage-option .stage-emoji {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .stage-option .stage-label {
+            display: block;
+            font-weight: 600;
+        }
+        .stage-modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .stage-modal-buttons button {
+            padding: 10px 28px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .stage-btn-confirm {
+            background: linear-gradient(135deg, #00f5ff, #7b2fff);
+            color: #fff;
+        }
+        .stage-btn-confirm:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 245, 255, 0.3);
+        }
+        .stage-btn-skip {
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.6);
+            border: 1px solid rgba(255,255,255,0.15) !important;
+        }
+        .stage-btn-skip:hover {
+            background: rgba(255,255,255,0.12);
+        }
+    </style>
+</head>
+<body>
+<!-- 配置页面 -->
+<div class="config-page" id="configPage">
+    <div class="config-container floating-panel">
+        <h1 class="config-title">辣椒产业数据管理平台</h1>
+        <p class="config-subtitle">请配置平台连接参数以开始管理</p>
+
+        <div class="config-form">
+            <div class="form-group">
+                <label for="configAccount">账号</label>
+                <input type="text" id="configAccount" placeholder="请输入账号" value="">
+            </div>
+            <div class="form-group">
+                <label for="configPassword">密码</label>
+                <input type="password" id="configPassword" placeholder="请输入密码" value="">
+            </div>
+            <div class="form-group">
+                <label for="configProjectID">项目ID</label>
+                <input type="text" id="configProjectID" placeholder="请输入项目ID" value="">
+            </div>
+            <div class="form-group">
+                <label for="configDeviceID">主设备ID</label>
+                <input type="text" id="configDeviceID" placeholder="请输入主设备ID" value="">
+            </div>
+            <div class="form-group">
+                <label for="configColdChainDeviceID">冷链运输设备ID</label>
+                <input type="text" id="configColdChainDeviceID" placeholder="请输入冷链运输设备ID" value="">
+            </div>
+            <div class="form-group">
+                <label for="configs_tempTag">幼苗区_温度传感器标识</label>
+                <input type="text" id="configs_tempTag" placeholder="幼苗区_温度传感器标识" value="s_temp">
+            </div>
+            <div class="form-group">
+                <label for="configs_humTag">幼苗区_湿度传感器标识</label>
+                <input type="text" id="configs_humTag" placeholder="幼苗区_湿度传感器标识" value="s_hum">
+            </div>
+            <div class="form-group">
+                <label for="configs_lxTag">幼苗区_光照传感器标识</label>
+                <input type="text" id="configs_lxTag" placeholder="幼苗区_光照传感器标识" value="s_lx">
+            </div>
+            <div class="form-group">
+                <label for="configs_soxTag">幼苗区_有害气体传感器标识</label>
+                <input type="text" id="configs_soxTag" placeholder="幼苗区_有害气体传感器标识" value="s_sox">
+            </div>
+            <div class="form-group">
+                <label for="configp_tempTag">种植区_土壤温度传感器标识</label>
+                <input type="text" id="configp_tempTag" placeholder="种植区_土壤温度传感器标识" value="p_temp">
+            </div>
+            <div class="form-group">
+                <label for="configp_humTag">种植区_土壤湿度传感器标识</label>
+                <input type="text" id="configp_humTag" placeholder="种植区_土壤湿度传感器标识" value="p_hum">
+            </div>
+            <div class="form-group">
+                <label for="configp_phTag">种植区_土壤PH值传感器标识</label>
+                <input type="text" id="configp_phTag" placeholder="种植区_土壤PH值传感器标识" value="p_ph">
+            </div>
+            <div class="form-group">
+                <label for="configp_NTag">种植区_土壤氮元素传感器标识</label>
+                <input type="text" id="configp_NTag" placeholder="种植区_土壤氮元素传感器标识" value="p_N">
+            </div>
+            <div class="form-group">
+                <label for="configp_PTag">种植区_土壤磷元素传感器标识</label>
+                <input type="text" id="configp_PTag" placeholder="种植区_土壤磷元素传感器标识" value="p_P">
+            </div>
+            <div class="form-group">
+                <label for="configp_KTag">种植区_土壤钾元素传感器标识</label>
+                <input type="text" id="configp_KTag" placeholder="种植区_土壤钾元素传感器标识" value="p_K">
+            </div>
+            <div class="form-group">
+                <label for="confige_tambTag">种植区_环境温度传感器标识</label>
+                <input type="text" id="confige_tambTag" placeholder="种植区_环境温度传感器标识" value="e_tamb">
+            </div>
+            <div class="form-group">
+                <label for="confige_ahTag">种植区_环境湿度传感器标识</label>
+                <input type="text" id="confige_ahTag" placeholder="种植区_环境湿度传感器标识" value="e_ah">
+            </div>
+            <div class="form-group">
+                <label for="confige_tvocTag">种植区_环境空气质量传感器标识</label>
+                <input type="text" id="confige_tvocTag" placeholder="种植区_环境空气质量传感器标识" value="e_tvoc">
+            </div>
+            <div class="form-group">
+                <label for="confige_btTag">种植区_环境人体传感器标识</label>
+                <input type="text" id="confige_btTag" placeholder="种植区_环境人体传感器标识" value="e_bt">
+            </div>
+            <div class="form-group">
+                <label for="confige_pmTag">种植区_环境PM2.5传感器标识</label>
+                <input type="text" id="confige_pmTag" placeholder="种植区_环境PM2.5传感器标识" value="e_pm">
+            </div>
+            <div class="form-group">
+                <label for="confige_patmTag">种植区_环境大气压传感器标识</label>
+                <input type="text" id="confige_patmTag" placeholder="种植区_环境大气压传感器标识" value="e_patm">
+            </div>
+            <div class="form-group">
+                <label for="configwsTag">种植区_环境风速传感器标识</label>
+                <input type="text" id="configwsTag" placeholder="种植区_环境风速传感器标识" value="ws">
+            </div>
+            <div class="form-group">
+                <label for="configr_tempTag">冷链运输区_温度传感器标识</label>
+                <input type="text" id="configr_tempTag" placeholder="冷链运输区_温度传感器标识" value="r_temp">
+            </div>
+            <div class="form-group">
+                <label for="configr_humTag">冷链运输区_湿度传感器标识</label>
+                <input type="text" id="configr_humTag" placeholder="冷链运输区_湿度传感器标识" value="r_hum">
+            </div>
+            <div class="form-group">
+                <label for="configr_co2Tag">冷链运输区_CO2传感器标识</label>
+                <input type="text" id="configr_co2Tag" placeholder="冷链运输区_CO2传感器标识" value="r_co2">
+            </div>
+            <div class="form-group">
+                <label for="configd_tempTag">烘干区_温度传感器标识</label>
+                <input type="text" id="configd_tempTag" placeholder="烘干区_温度传感器标识" value="d_temp">
+            </div>
+            <div class="form-group">
+                <label for="configd_humTag">烘干区_湿度传感器标识</label>
+                <input type="text" id="configd_humTag" placeholder="烘干区_湿度传感器标识" value="d_hum">
+            </div>
+            <div class="form-group">
+                <label for="configs_lightTagControl">幼苗区_补光灯执行器标识</label>
+                <input type="text" id="configs_lightTagControl" placeholder="幼苗区_补光灯执行器标识" value="s_light">
+            </div>
+            <div class="form-group">
+                <label for="configs_fanTagControl">幼苗区_通风扇执行器标识</label>
+                <input type="text" id="configs_fanTagControl" placeholder="幼苗区_通风扇执行器标识" value="s_fan">
+            </div>
+            <div class="form-group">
+                <label for="configw_wpTagControl">蓄水区_水泵执行器标识</label>
+                <input type="text" id="configw_wpTagControl" placeholder="蓄水区_水泵执行器标识" value="w_wp">
+            </div>
+            <div class="form-group">
+                <label for="configd_drlampTagControl">烘干区_烘干灯执行器标识</label>
+                <input type="text" id="configd_drlampTagControl" placeholder="烘干区_烘干灯执行器标识" value="d_drlamp">
+            </div>
+            <div class="form-group">
+                <label for="configd_cvTagControl">烘干区_传送带执行器标识</label>
+                <input type="text" id="configd_cvTagControl" placeholder="烘干区_传送带执行器标识" value="d_cv">
+            </div>
+            <div class="form-group">
+                <label for="configd_fanTagControl">烘干区_通风扇执行器标识</label>
+                <input type="text" id="configd_fanTagControl" placeholder="烘干区_通风扇执行器标识" value="d_fan">
+            </div>
+            <div class="form-group">
+                <label for="configred_lightTagControl">三色灯执行器标识</label>
+                <input type="text" id="configred_lightTagControl" placeholder="三色灯执行器标识" value="red_light">
+            </div>
+            <div class="form-group">
+                <label for="configbuzzerTagControl">蜂鸣器执行器标识</label>
+                <input type="text" id="configbuzzerTagControl" placeholder="蜂鸣器执行器标识" value="buzzer">
+            </div>
+        </div>
+
+        <button class="btn-gradient config-btn" id="configSubmit">
+            <span>连接平台并开始监控</span>
+        </button>
+    </div>
+</div>
+
+<!-- 数据展示页面 -->
+<div class="container" id="dashboardPage" style="display:none;">
+    <!-- 内嵌式标题 -->
+    <div class="embedded-header floating-panel">
+        <div class="header-left-text">
+            <p>实时监控农业环境数据，智能分析设备运行状态</p>
+        </div>
+        <div class="nav-left">
+            <a href="lenglian.html" class="nav-btn">🚛 运输管理</a>
+        </div>
+        <div class="header-title-box">
+            <h1>辣椒产业数据管理平台</h1>
+        </div>
+        <div class="nav-right">
+            <a href="sql.html" class="nav-btn">📋 数据中心</a>
+        </div>
+        <div class="header-right-time">
+            <div class="current-time" id="currentTime">--:--:--</div>
+            <div class="current-date" id="currentDate">----年--月--日</div>
+        </div>
+    </div>
+
+    <div class="main-content" style="margin-top: 80px;">
+        <!-- 左侧：平台连接状态和设备状态 -->
+        <section class="floating-panel config-panel">
+            <!-- 平台连接状态面板 -->
+            <div class="panel-header">
+                <span>平台连接状态</span>
+                <span class="status-indicator offline" id="deviceStatus">设备离线</span>
+            </div>
+            <div class="panel-body">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                    <div style="background: rgba(0, 0, 0, 0.3); border-radius: 12px; padding: 12px; border: 1px solid rgba(0, 245, 255, 0.15); text-align: center; display: flex; flex-direction: column; justify-content: center; min-height: 80px;">
+                        <div style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 6px;">主设备ID</div>
+                        <div style="font-size: 1.1rem; font-weight: 700; color: #00f5ff;" id="deviceIDDisplay">--</div>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.3); border-radius: 12px; padding: 12px; border: 1px solid rgba(0, 245, 255, 0.15); text-align: center; display: flex; flex-direction: column; justify-content: center; min-height: 80px;">
+                        <div style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 6px;">冷链设备ID</div>
+                        <div style="font-size: 1.1rem; font-weight: 700; color: #00f5ff;" id="coldChainDeviceIDDisplay">--</div>
+                    </div>
+                    <div style="background: rgba(0, 0, 0, 0.3); border-radius: 12px; padding: 12px; border: 1px solid rgba(0, 245, 255, 0.15); display: flex; align-items: center; justify-content: center; min-height: 80px;">
+                        <button class="btn-outline" id="reconnectBtn">
+                            <span>重新连接</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 设备运行状态 -->
+            <div class="panel-header">
+                <span>设备运行状态</span>
+            </div>
+            <div class="panel-body">
+                <div class="device-status-grid">
+                    <div class="floating-card device-status-item">
+                        <svg class="device-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"/>
+                            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                        </svg>
+                        <div class="status-label">幼苗区_补光灯</div>
+                        <div class="status-value status-offline" id="s_light-state">关闭</div>
+                    </div>
+
+                    <div class="floating-card device-status-item">
+                        <svg class="device-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                        </svg>
+                        <div class="status-label">幼苗区_通风扇</div>
+                        <div class="status-value status-offline" id="s_fan-state">关闭</div>
+                    </div>
+
+                    <div class="floating-card device-status-item">
+                        <svg class="device-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v20M2 12h20"/>
+                        </svg>
+                        <div class="status-label">蓄水区_水泵</div>
+                        <div class="status-value status-offline" id="w_wp-state">关闭</div>
+                    </div>
+
+                    <div class="floating-card device-status-item">
+                        <svg class="device-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v20M2 12h20"/>
+                        </svg>
+                        <div class="status-label">烘干区_烘干灯</div>
+                        <div class="status-value status-offline" id="d_drlamp-state">关闭</div>
+                    </div>
+
+                    <div class="floating-card device-status-item">
+                        <svg class="device-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="6" width="20" height="12" rx="2"/>
+                            <path d="M6 10h.01M6 14h.01M10 10h.01M10 14h.01M14 10h.01M14 14h.01M18 10h.01M18 14h.01"/>
+                        </svg>
+                        <div class="status-label">烘干区_传送带</div>
+                        <div class="status-value status-offline" id="d_cv-state">关闭</div>
+                    </div>
+
+                    <div class="floating-card device-status-item">
+                        <svg class="device-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                        </svg>
+                        <div class="status-label">烘干区_通风扇</div>
+                        <div class="status-value status-offline" id="d_fan-state">关闭</div>
+                    </div>
+
+                    <div class="floating-card device-status-item">
+                        <svg class="device-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                        <div class="status-label">预警灯</div>
+                        <div class="status-value status-offline" id="red_light-state">关闭</div>
+                    </div>
+
+                    <div class="floating-card device-status-item">
+                        <svg class="device-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 16h8M8 20h8M12 12v8"/>
+                        </svg>
+                        <div class="status-label">蜂鸣器</div>
+                        <div class="status-value status-offline" id="buzzer-state">关闭</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI分析面板 -->
+            <div class="panel-header">
+                <span>AI智能分析</span>
+            </div>
+            <div class="panel-body">
+                <div class="ai-config-panel" id="aiConfigSection">
+                    <div class="ai-config-content">
+                        <div class="ai-config-description">
+                            <p>启用AI分析功能基于传感器数据获取专业的种植建议。</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="your_api_key">DeepSeek API密钥</label>
+                            <input type="password" id="your_api_key" placeholder="请输入DeepSeek API密钥">
+                        </div>
+                        <div class="ai-config-actions">
+                            <button class="btn-gradient" id="enableAI">
+                                <span>启用AI分析</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div id="aiPanel" style="display: none;">
+                    <div class="ai-content" style="padding: 10px;">
+                        <div class="ai-summary" style="grid-template-columns: repeat(3, 1fr);">
+                            <div class="ai-assessment">
+                                <div class="ai-label">环境评估</div>
+                                <div class="ai-value" id="aiAssessment">--</div>
+                            </div>
+                            <div class="ai-risk">
+                                <div class="ai-label">风险级别</div>
+                                <div class="ai-value risk-level" id="aiRiskLevel">--</div>
+                            </div>
+                            <div class="ai-timestamp">
+                                <div class="ai-label">最后分析</div>
+                                <div class="ai-value" id="lastAIPrediction">--:--:--</div>
+                            </div>
+                        </div>
+                        <div class="ai-details">
+                            <div class="ai-section">
+                                <h4 style="margin-bottom: 5px; font-size: 0.9rem;">趋势预测</h4>
+                                <ul class="ai-list" id="aiPredictions">
+                                    <li style="padding: 6px 10px; font-size: 0.85rem;">启用AI分析后显示预测</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 中间：摄像头监控 -->
+        <section class="floating-panel map-panel">
+            <div class="panel-header">
+                <span>📹 摄像头监控</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button class="btn-outline" id="connectCameraBtn" style="font-size: 0.75rem; border-color: rgba(0, 245, 255, 0.5); color: #00f5ff;">📡 连接监控</button>
+                    <button class="btn-outline" id="disconnectCameraBtn" style="display:none; font-size: 0.75rem; border-color: rgba(255, 152, 0, 0.5); color: #ff9800;">⏹️ 断开</button>
+                    <button class="btn-outline" id="takePhotoBtn" style="font-size: 0.75rem; border-color: rgba(76, 175, 80, 0.5); color: #4caf50;">📸 拍照</button>
+                    <span class="status-indicator" id="cameraStatus" style="background:#ff9800;">未连接</span>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div style="width: 100%; height: 400px; position: relative; background: #000; border-radius: 8px; border: 1px solid rgba(0, 245, 255, 0.3); overflow: hidden;">
+                    <div id="cameraPanContainer" style="width:100%; height:100%; position:relative; overflow:hidden; cursor:grab; user-select:none;">
+                        <img id="cameraImage" src="" alt="摄像头画面"
+                             style="width:100%; height:100%; display:none; transform-origin: center center; pointer-events:none;" decoding="sync" fetchpriority="high">
+                    </div>
+                    <div class="camera-loading" id="cameraLoading" style="display:flex; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8);">
+                        <div class="loading-spinner"></div>
+                        <p>摄像头加载中...</p>
+                    </div>
+                    
+                    <!-- 底部PTZ控制区域（可折叠） -->
+                    <div id="ptzPanel" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 12px; display: none;">
+                        <div style="position: absolute; top: 8px; right: 10px;">
+                            <button class="btn-outline" style="padding: 4px 10px; font-size: 0.65rem; border-color: rgba(0, 245, 255, 0.4); color: #00f5ff;" onclick="togglePTZ()">
+                                ✕ 收起
+                            </button>
+                        </div>
+                        <div class="ptz-controls" style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
+                            <div style="display: flex; gap: 4px;">
+                                <button class="ptz-btn" data-action="up" style="width: 40px; height: 30px; font-size: 0.8rem; background: rgba(0,245,255,0.15); border: 1px solid rgba(0,245,255,0.3); color: #00f5ff;">↑</button>
+                            </div>
+                            <div style="display: flex; gap: 4px;">
+                                <button class="ptz-btn" data-action="left" style="width: 40px; height: 30px; font-size: 0.8rem; background: rgba(0,245,255,0.15); border: 1px solid rgba(0,245,255,0.3); color: #00f5ff;">←</button>
+                                <button class="ptz-btn" data-action="stop" style="width: 40px; height: 30px; font-size: 0.8rem; background: rgba(0,245,255,0.15); border: 1px solid rgba(0,245,255,0.3); color: #00f5ff;">■</button>
+                                <button class="ptz-btn" data-action="right" style="width: 40px; height: 30px; font-size: 0.8rem; background: rgba(0,245,255,0.15); border: 1px solid rgba(0,245,255,0.3); color: #00f5ff;">→</button>
+                            </div>
+                            <div style="display: flex; gap: 4px;">
+                                <button class="ptz-btn" data-action="down" style="width: 40px; height: 30px; font-size: 0.8rem; background: rgba(0,245,255,0.15); border: 1px solid rgba(0,245,255,0.3); color: #00f5ff;">↓</button>
+                            </div>
+                            <!-- 缩放滑轨 -->
+                            <div style="width: 180px; margin-top: 8px; padding: 8px; background: rgba(0,0,0,0.5); border-radius: 6px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                    <span style="color: #f44336; font-size: 0.7rem;">缩小</span>
+                                    <span id="zoomValue" style="color: #00f5ff; font-size: 0.7rem;">0</span>
+                                    <span style="color: #4caf50; font-size: 0.7rem;">放大</span>
+                                </div>
+                                <input type="range" id="zoomSlider" min="1" max="3" step="0.1" value="1"
+                                     style="width: 100%; cursor: pointer; appearance: none; height: 6px; border-radius: 3px; background: linear-gradient(to right, #f44336, #444, #4caf50);">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 右下角展开方向控制按钮 -->
+                    <button class="btn-outline" style="position: absolute; bottom: 10px; right: 10px; padding: 6px 12px; font-size: 0.7rem; background: rgba(0,0,0,0.6); border-color: rgba(0, 245, 255, 0.4); color: #00f5ff;" onclick="togglePTZ()">
+                        🔧 控制
+                    </button>
+                </div>
+            </div>
+
+            <!-- 数据趋势图 - 仅保留传感器选择 -->
+            <div class="panel-header">
+                <span>数据趋势图</span>
+            </div>
+            <div class="panel-body">
+                <div class="chart-selector">
+                    <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; margin-bottom: 10px;">
+                        <div>
+                            <label for="chartType">选择传感器：</label>
+                            <select id="chartType" onchange="updateChart(this.value)">
+                                <option value="s_temp">幼苗区_温度</option>
+                                <option value="s_hum">幼苗区_湿度</option>
+                                <option value="s_lx">幼苗区_光照</option>
+                                <option value="s_sox">幼苗区_有害气体</option>
+                                <option value="e_tamb">种植区_环境温度</option>
+                                <option value="e_ah">种植区_环境湿度</option>
+                                <option value="e_tvoc">种植区_环境空气质量</option>
+                                <option value="e_bt">种植区_环境人体</option>
+                                <option value="e_pm">种植区_环境PM2.5</option>
+                                <option value="e_patm">种植区_环境大气压</option>
+                                <option value="ws">种植区_环境风速</option>
+                                <option value="p_temp">种植区_土壤温度</option>
+                                <option value="p_hum">种植区_土壤湿度</option>
+                                <option value="p_ph">种植区_土壤PH值</option>
+                                <option value="p_N">种植区_土壤氮元素</option>
+                                <option value="p_P">种植区_土壤磷元素</option>
+                                <option value="p_K">种植区_土壤钾元素</option>
+                                <option value="d_temp">烘干区_温度</option>
+                                <option value="d_hum">烘干区_湿度</option>
+                                <option value="r_temp">冷链运输区_温度</option>
+                                <option value="r_hum">冷链运输区_湿度</option>
+                                <option value="r_co2">冷链运输区_CO2</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="dataChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- 右侧：传感器数据和图表 -->
+        <section class="floating-panel data-panel">
+            <div class="panel-header">
+                <span>传感器数据</span>
+            </div>
+            <div class="panel-body">
+                <div class="sensor-grid" id="sensorGrid">
+                    <!-- 传感器卡片将通过JS动态生成 -->
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    // ========== 摄像头监控脚本（低延迟优化版）==========
+    const RTSP_SERVER = `/rtsp`;
+    let mjpegConnected = false;
+    let reconnectAttempts = 0;
+    let lastFrameTime = 0;
+
+    // PTZ 命令队列
+    let ptzQueue = [];
+    let isProcessingPtz = false;
+    
+    // 缩放控制
+    let zoomInterval = null;
+    let lastZoomValue = 0;
+
+    // 客户端缩放/拖拽状态
+    let currentZoom = 1.0;
+    let panX = 0, panY = 0;
+    let isDragging = false;
+    let dragStartX = 0, dragStartY = 0;
+    let panStartX = 0, panStartY = 0;
+
+    const cameraImage = document.getElementById('cameraImage');
+    const cameraLoading = document.getElementById('cameraLoading');
+    const connectBtn = document.getElementById('connectCameraBtn');
+    const disconnectBtn = document.getElementById('disconnectCameraBtn');
+    const takePhotoBtn = document.getElementById('takePhotoBtn');
+    const cameraStatusSpan = document.getElementById('cameraStatus');
+    const zoomSlider = document.getElementById('zoomSlider');
+    const zoomValue = document.getElementById('zoomValue');
+
+    function togglePTZ() {
+        const ptzPanel = document.getElementById('ptzPanel');
+        const toggleBtn = document.querySelector('#ptzPanel + button, .map-panel .btn-info');
+        
+        if (ptzPanel.style.display === 'none') {
+            ptzPanel.style.display = 'block';
+            if (toggleBtn) toggleBtn.innerHTML = '🔧 收起';
+        } else {
+            ptzPanel.style.display = 'none';
+            if (toggleBtn) toggleBtn.innerHTML = '🔧 展开';
+        }
+    }
+
+    function updateCameraStatus(connected) {
+        mjpegConnected = connected;
+        if (connected) {
+            cameraStatusSpan.textContent = '已连接';
+            cameraStatusSpan.style.background = '#4caf50';
+            connectBtn.style.display = 'none';
+            disconnectBtn.style.display = 'inline-block';
+            cameraLoading.style.display = 'none';
+            cameraImage.style.display = 'block';
+        } else {
+            cameraStatusSpan.textContent = '未连接';
+            cameraStatusSpan.style.background = '#ff9800';
+            connectBtn.style.display = 'inline-block';
+            disconnectBtn.style.display = 'none';
+        }
+    }
+
+    function connectCamera() {
+        console.log('连接摄像头...');
+        cameraLoading.style.display = 'flex';
+        cameraImage.style.display = 'none';
+        mjpegConnected = false;
+
+        // 使用固定URL避免缓存抖动
+        const baseUrl = `${RTSP_SERVER}/mjpeg`;
+        
+        cameraImage.style.display = 'block';
+        cameraImage.loading = 'eager';
+        // 使用新Image对象预加载，减少闪烁
+        if (window.mjpegPreloader) {
+            window.mjpegPreloader.src = '';
+        }
+        window.mjpegPreloader = new Image();
+        window.mjpegPreloader.style.display = 'none';
+        
+        // 直接设置src，不使用时间戳避免浏览器频繁重连
+        cameraImage.src = baseUrl;
+
+        cameraImage.onload = function() {
+            cameraLoading.style.display = 'none';
+            mjpegConnected = true;
+            lastFrameTime = Date.now();
+            cameraStatusSpan.textContent = '已连接';
+            cameraStatusSpan.style.background = '#4caf50';
+            connectBtn.style.display = 'none';
+            disconnectBtn.style.display = 'inline-block';
+            console.log('摄像头连接成功');
+        };
+
+        cameraImage.onerror = function() {
+            if (!mjpegConnected) {
+                console.log('摄像头连接失败');
+                updateCameraStatus(false);
+                cameraLoading.innerHTML = '<div class="loading-spinner"></div><p>连接失败，' + (reconnectAttempts < 3 ? '重试中...' : '请检查摄像头') + '</p>';
+                
+                reconnectAttempts++;
+                if (reconnectAttempts < 5) {
+                    setTimeout(connectCamera, 3000);
+                }
+            }
+        };
+
+        setTimeout(() => {
+            if (!mjpegConnected && cameraLoading.style.display !== 'none') {
+                cameraLoading.innerHTML = '<div class="loading-spinner"></div><p>连接超时，请检查rtsp_server.py</p>';
+            }
+        }, 8000);
+    }
+
+    // 页面可见性变化监听 - 解决切换页面后摄像头断开问题
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            console.log('页面变为可见，检查摄像头连接...');
+            if (!mjpegConnected) {
+                console.log('摄像头未连接，自动重新连接...');
+                connectCamera();
+            } else {
+                // 刷新视频流
+                cameraImage.src = `${RTSP_SERVER}/mjpeg`;
+            }
+        }
+    });
+
+    // 页面焦点变化监听
+    window.addEventListener('focus', function() {
+        if (document.visibilityState === 'visible') {
+            console.log('页面获得焦点，刷新摄像头连接...');
+            if (!mjpegConnected) {
+                connectCamera();
+            }
+        }
+    });
+
+    // 检查画面是否卡住（延长检查间隔，减少刷新频率）
+    let lostFrameCount = 0;
+    setInterval(() => {
+        if (mjpegConnected) {
+            const now = Date.now();
+            // 如果超过5秒没有新帧，尝试刷新
+            if (now - lastFrameTime > 5000) {
+                lostFrameCount++;
+                console.log('画面可能卡住，尝试刷新... (第' + lostFrameCount + '次)');
+                // 只刷新URL，不做完全重连
+                cameraImage.src = `${RTSP_SERVER}/mjpeg?refresh=${Date.now()}`;
+                lastFrameTime = now;
+            } else {
+                lostFrameCount = 0;
+            }
+        }
+    }, 3000);
+
+    function disconnectCamera() {
+        console.log('断开摄像头');
+        cameraImage.src = '';
+        cameraImage.onload = null;
+        cameraImage.onerror = null;
+        cameraImage.style.display = 'none';
+        mjpegConnected = false;
+        cameraLoading.style.display = 'flex';
+        cameraLoading.innerHTML = '<div class="loading-spinner"></div><p>已断开连接</p>';
+        updateCameraStatus(false);
+        
+        setTimeout(() => {
+            if (!mjpegConnected) {
+                cameraLoading.innerHTML = '<div class="loading-spinner"></div><p>摄像头加载中...</p>';
+            }
+        }, 2000);
+    }
+
+    async function sendPtzCommand(action) {
+        if (!mjpegConnected) {
+            console.log('摄像头未连接，无法发送PTZ命令');
+            return;
+        }
+
+        const btn = document.querySelector(`[data-action="${action}"]`);
+        if (btn) {
+            btn.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                if (btn) btn.style.transform = '';
+            }, 100);
+        }
+
+        ptzQueue.push(action);
+        processPtzQueue();
+    }
+
+    async function processPtzQueue() {
+        if (isProcessingPtz || ptzQueue.length === 0) return;
+
+        isProcessingPtz = true;
+        const action = ptzQueue.shift();
+
+        try {
+            const response = await fetch(`${RTSP_SERVER}/ptz`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: action })
+            });
+            await response.json();
+        } catch (error) {
+            console.error('PTZ命令失败:', error);
+        }
+
+        isProcessingPtz = false;
+        setTimeout(() => processPtzQueue(), 100);
+    }
+
+    async function sendZoomValue(value) {
+        if (!mjpegConnected) return;
+        
+        try {
+            await fetch(`${RTSP_SERVER}/ptz/zoom`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ value: value })
+            });
+        } catch (error) {
+            console.error('Zoom命令失败:', error);
+        }
+    }
+
+    async function sendZoomStop() {
+        try {
+            await fetch(`${RTSP_SERVER}/ptz/zoom/stop`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            });
+        } catch (error) {
+            console.error('Zoom stop失败:', error);
+        }
+    }
+
+    // 生长阶段中文映射
+    const stageLabels = {
+        'seedling': '育苗期',
+        'grow': '生长开花期',
+        'harvest': '采收期',
+        'other': '其他',
+        'unknown': '未识别'
+    };
+
+    const stageEmojis = {
+        'seedling': '🌱',
+        'grow': '🌿',
+        'harvest': '🌶️',
+        'other': '📷',
+        'unknown': '❓'
+    };
+
+    // ========== 阶段选择弹窗状态 ==========
+    let latestPhotoId = null;
+    let latestAiStage = null;
+
+    async function classifyLatestPhoto() {
+        try {
+            // 获取最新图片 ID
+            const listResp = await fetch(`${API_BASE}/pictrue?limit=1`);
+            const listResult = await listResp.json();
+            if (!listResult.success || listResult.data.length === 0) return null;
+
+            latestPhotoId = listResult.data[0].id;
+
+            // 调用分类接口
+            const classifyResp = await fetch(`${API_BASE}/pictrue/classify/${latestPhotoId}`, { method: 'POST' });
+            const classifyResult = await classifyResp.json();
+            if (!classifyResult.success) return null;
+
+            return classifyResult.stage;
+        } catch (error) {
+            console.error('分类失败:', error);
+            return null;
+        }
+    }
+
+    function selectStage(el) {
+        document.querySelectorAll('.stage-option').forEach(opt => opt.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
+    function confirmStage() {
+        const selected = document.querySelector('.stage-option.selected');
+        if (!selected) {
+            showToast('⚠️ 请先选择一个生长阶段');
+            return;
+        }
+        const stage = selected.getAttribute('data-stage');
+        updatePhotoStage(latestPhotoId, stage);
+        document.getElementById('stageModal').classList.remove('active');
+
+        const label = stageLabels[stage] || stage;
+        const emoji = stageEmojis[stage] || '❓';
+        showToast(`${emoji} 已标记为：${label}`);
+    }
+
+    function skipStage() {
+        document.getElementById('stageModal').classList.remove('active');
+        if (latestAiStage && latestAiStage !== 'unknown') {
+            const emoji = stageEmojis[latestAiStage] || '❓';
+            const label = stageLabels[latestAiStage] || latestAiStage;
+            showToast(`${emoji} 已保留AI识别结果：${label}`);
+        } else {
+            showToast('📸 照片已保存到数据库');
+        }
+    }
+
+    async function updatePhotoStage(photoId, stage) {
+        try {
+            await fetch(`${API_BASE}/pictrue/${photoId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ stage })
+            });
+        } catch (error) {
+            console.error('更新阶段失败:', error);
+        }
+    }
+
+    function takePhoto() {
+        if (!mjpegConnected || !cameraImage.src || cameraImage.src === '') {
+            alert('请先连接摄像头');
+            return;
+        }
+
+        showToast('📸 正在拍照...');
+        
+        fetch(`${RTSP_SERVER}/snapshot`, { method: 'GET', cache: 'no-cache' })
+            .then(async response => {
+                if (response.ok) {
+                    showToast('📸 照片已保存，正在AI识别...');
+                    latestAiStage = await classifyLatestPhoto();
+
+                    // 更新弹窗 AI 识别结果
+                    const aiLabelEl = document.getElementById('aiStageLabel');
+                    if (latestAiStage && latestAiStage !== 'unknown') {
+                        const label = stageLabels[latestAiStage] || latestAiStage;
+                        const emoji = stageEmojis[latestAiStage] || '';
+                        aiLabelEl.textContent = `${emoji} ${label}`;
+
+                        // 自动选中 AI 识别的阶段
+                        document.querySelectorAll('.stage-option').forEach(opt => {
+                            if (opt.getAttribute('data-stage') === latestAiStage) {
+                                opt.classList.add('selected');
+                            } else {
+                                opt.classList.remove('selected');
+                            }
+                        });
+                    } else {
+                        aiLabelEl.textContent = '❓ 未识别';
+                        document.querySelectorAll('.stage-option').forEach(opt => opt.classList.remove('selected'));
+                    }
+
+                    // 弹出阶段选择对话框
+                    document.getElementById('stageModal').classList.add('active');
+                } else {
+                    showToast('❌ 拍照失败');
+                }
+            })
+            .catch(error => {
+                console.error('拍照失败:', error);
+                showToast('❌ 拍照失败');
+            });
+    }
+
+    // Toast 提示
+    function showToast(message) {
+        const existing = document.querySelector('.toast-notification');
+        if (existing) existing.remove();
+        
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification';
+        toast.textContent = message;
+        Object.assign(toast.style, {
+            position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)',
+            background: 'linear-gradient(135deg, #00f5ff, #7b2fff)',
+            color: '#fff', padding: '14px 28px', borderRadius: '12px',
+            fontSize: '16px', fontWeight: '600', zIndex: '9999',
+            boxShadow: '0 4px 20px rgba(0,245,255,0.3)',
+            opacity: '0', transition: 'opacity 0.3s'
+        });
+        document.body.appendChild(toast);
+        
+        requestAnimationFrame(() => { toast.style.opacity = '1'; });
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 2500);
+    }
+
+    // 绑定PTZ按钮事件 - 长按控制
+    document.querySelectorAll('.ptz-btn').forEach(btn => {
+        let ptzTimer = null;
+        
+        btn.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const action = btn.getAttribute('data-action');
+            if (action && mjpegConnected) {
+                sendPtzCommand(action);
+                ptzTimer = setInterval(() => {
+                    sendPtzCommand(action);
+                }, 200);
+                btn.style.background = 'rgba(0,245,255,0.5)';
+                btn.style.transform = 'scale(0.98)';
+            }
+        });
+        
+        btn.addEventListener('mouseup', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (ptzTimer) {
+                clearInterval(ptzTimer);
+                ptzTimer = null;
+            }
+            if (mjpegConnected) {
+                sendPtzCommand('stop');
+            }
+            btn.style.background = 'rgba(0,245,255,0.15)';
+            btn.style.transform = '';
+        });
+        
+        btn.addEventListener('mouseleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (ptzTimer) {
+                clearInterval(ptzTimer);
+                ptzTimer = null;
+            }
+            if (mjpegConnected) {
+                sendPtzCommand('stop');
+            }
+            btn.style.background = 'rgba(0,245,255,0.15)';
+            btn.style.transform = '';
+        });
+        
+        btn.addEventListener('dragstart', (e) => {
+            e.preventDefault();
+        });
+    });
+
+    // 应用缩放 + 平移变换
+    function applyZoomPan() {
+        const container = document.getElementById('cameraPanContainer');
+        if (!container || !cameraImage) return;
+        // 限制平移范围：缩放后图像比容器大的部分才允许平移
+        const scale = currentZoom;
+        const maxPanX = Math.max(0, (scale - 1) * (container.clientWidth / 2));
+        const maxPanY = Math.max(0, (scale - 1) * (container.clientHeight / 2));
+        panX = Math.max(-maxPanX, Math.min(maxPanX, panX));
+        panY = Math.max(-maxPanY, Math.min(maxPanY, panY));
+        cameraImage.style.transform = `scale(${scale}) translate(${panX}px, ${panY}px)`;
+    }
+
+    // 绑定缩放滑轨事件（纯客户端）
+    if (zoomSlider) {
+        zoomSlider.addEventListener('input', function(e) {
+            currentZoom = parseFloat(this.value);
+            zoomValue.textContent = currentZoom.toFixed(1) + 'x';
+            // 缩放时自动居中
+            panX = 0;
+            panY = 0;
+            applyZoomPan();
+            // 更新光标样式
+            const container = document.getElementById('cameraPanContainer');
+            if (container) {
+                container.style.cursor = currentZoom > 1.0 ? 'grab' : 'default';
+            }
+        });
+
+        // 双击滑轨重置缩放
+        zoomSlider.addEventListener('dblclick', function() {
+            this.value = 1.0;
+            currentZoom = 1.0;
+            panX = 0;
+            panY = 0;
+            zoomValue.textContent = '1.0x';
+            applyZoomPan();
+            const container = document.getElementById('cameraPanContainer');
+            if (container) container.style.cursor = 'default';
+        });
+    }
+
+    // 拖拽平移 (只在缩放 > 1 时生效)
+    const panContainer = document.getElementById('cameraPanContainer');
+    if (panContainer) {
+        panContainer.addEventListener('mousedown', function(e) {
+            if (currentZoom <= 1.0) return;
+            isDragging = true;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            panStartX = panX;
+            panStartY = panY;
+            this.style.cursor = 'grabbing';
+            e.preventDefault();
+        });
+
+        window.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            const dx = e.clientX - dragStartX;
+            const dy = e.clientY - dragStartY;
+            panX = panStartX + dx;
+            panY = panStartY + dy;
+            applyZoomPan();
+            e.preventDefault();
+        });
+
+        window.addEventListener('mouseup', function() {
+            if (isDragging) {
+                isDragging = false;
+                const container = document.getElementById('cameraPanContainer');
+                if (container) container.style.cursor = currentZoom > 1.0 ? 'grab' : 'default';
+            }
+        });
+
+        // 触控支持 (手机平板)
+        panContainer.addEventListener('touchstart', function(e) {
+            if (currentZoom <= 1.0) return;
+            if (e.touches.length === 1) {
+                isDragging = true;
+                dragStartX = e.touches[0].clientX;
+                dragStartY = e.touches[0].clientY;
+                panStartX = panX;
+                panStartY = panY;
+            }
+        }, { passive: true });
+
+        panContainer.addEventListener('touchmove', function(e) {
+            if (!isDragging || e.touches.length !== 1) return;
+            const dx = e.touches[0].clientX - dragStartX;
+            const dy = e.touches[0].clientY - dragStartY;
+            panX = panStartX + dx;
+            panY = panStartY + dy;
+            applyZoomPan();
+        }, { passive: true });
+
+        panContainer.addEventListener('touchend', function() {
+            isDragging = false;
+        }, { passive: true });
+    }
+
+    // 移除旧的 server zoom 函数（废弃）
+    // 保留空函数以免 beforeunload 报错
+    async function sendZoomValue(value) {}
+    async function sendZoomStop() {}
+
+    // 绑定连接/断开按钮
+    if (connectBtn) connectBtn.addEventListener('click', connectCamera);
+    if (disconnectBtn) disconnectBtn.addEventListener('click', disconnectCamera);
+    if (takePhotoBtn) takePhotoBtn.addEventListener('click', takePhoto);
+
+    // 页面加载时自动连接摄像头
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            if (connectBtn && connectBtn.style.display !== 'none') {
+                console.log('自动连接摄像头...');
+                connectCamera();
+            }
+        }, 2000);
+    });
+
+    // 页面关闭时清理
+    window.addEventListener('beforeunload', function() {
+        if (zoomInterval) {
+            clearInterval(zoomInterval);
+        }
+        sendZoomStop();
+        if (cameraImage) {
+            cameraImage.src = '';
+        }
+    });
+
+    // 时间更新
+    function updateTime() {
+        const now = new Date();
+        document.getElementById('currentTime').textContent = now.toLocaleTimeString();
+        document.getElementById('currentDate').textContent = now.toLocaleDateString('zh-CN');
+    }
+    updateTime();
+    setInterval(updateTime, 1000);
+</script>
+
+<!-- ========== 阶段选择弹窗 ========== -->
+<div class="stage-modal-overlay" id="stageModal">
+    <div class="stage-modal">
+        <div class="stage-modal-title">📸 选择生长阶段</div>
+        <div class="stage-modal-subtitle">请选择这张照片对应的辣椒生长阶段</div>
+        <div class="stage-modal-ai-result" id="stageModalAiResult">
+            🤖 AI 识别结果：<strong id="aiStageLabel">未识别</strong>
+        </div>
+        <div class="stage-options" id="stageOptions">
+            <div class="stage-option" data-stage="seedling" onclick="selectStage(this)">
+                <span class="stage-emoji">🌱</span>
+                <span class="stage-label">育苗期</span>
+            </div>
+            <div class="stage-option" data-stage="grow" onclick="selectStage(this)">
+                <span class="stage-emoji">🌿</span>
+                <span class="stage-label">生长开花期</span>
+            </div>
+            <div class="stage-option" data-stage="harvest" onclick="selectStage(this)">
+                <span class="stage-emoji">🌶️</span>
+                <span class="stage-label">采收期</span>
+            </div>
+            <div class="stage-option" data-stage="other" onclick="selectStage(this)">
+                <span class="stage-emoji">📷</span>
+                <span class="stage-label">其他</span>
+            </div>
+        </div>
+        <div class="stage-modal-buttons">
+            <button class="stage-btn-confirm" onclick="confirmStage()">✅ 确认</button>
+            <button class="stage-btn-skip" onclick="skipStage()">⏭️ 跳过</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+FROM rockylinux/rockylinux:10
+
+RUN yum install -y -q python3 python3-pip python3-devel \
+    && yum clean all \
+    && rm -rf /var/cache/yum/*
+
+WORKDIR /app
+
+COPY Android_AI/requirements.txt ./
+RUN pip3 install --no-cache-dir -r requirements.txt && rm -rf ~/.cache/pip
+
+COPY Android_AI/AI.py ./
+COPY Android_AI/.env ./
+
+EXPOSE 4000
+CMD ["python3", "AI.py"]

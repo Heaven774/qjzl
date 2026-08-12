@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF1A1A2E</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="gray_50">#F8FAFC</color>
+    <color name="gray_100">#F1F5F9</color>
+    <color name="gray_200">#E2E8F0</color>
+    <color name="gray_300">#CBD5E1</color>
+    <color name="gray_400">#94A3B8</color>
+    <color name="gray_500">#64748B</color>
+    <color name="gray_600">#475569</color>
+    <color name="gray_700">#334155</color>
+    <color name="gray_800">#1E293B</color>
+    <color name="gray_900">#0F172A</color>
+
+    <color name="primary_50">#ECFDF5</color>
+    <color name="primary_100">#D1FAE5</color>
+    <color name="primary_200">#A7F3D0</color>
+    <color name="primary_300">#6EE7B7</color>
+    <color name="primary_400">#34D399</color>
+    <color name="primary_500">#10B981</color>
+    <color name="primary_600">#059669</color>
+    <color name="primary_700">#047857</color>
+    <color name="primary_800">#065F46</color>
+    <color name="primary_900">#064E3B</color>
+
+    <color name="secondary_50">#FEF3C7</color>
+    <color name="secondary_100">#FDE68A</color>
+    <color name="secondary_200">#FCD34D</color>
+    <color name="secondary_300">#FBBF24</color>
+    <color name="secondary_400">#F59E0B</color>
+    <color name="secondary_500">#D97706</color>
+    <color name="secondary_600">#B45309</color>
+
+    <color name="accent_50">#EFF6FF</color>
+    <color name="accent_100">#DBEAFE</color>
+    <color name="accent_200">#BFDBFE</color>
+    <color name="accent_300">#93C5FD</color>
+    <color name="accent_400">#60A5FA</color>
+    <color name="accent_500">#3B82F6</color>
+    <color name="accent_600">#2563EB</color>
+
+    <color name="danger_500">#EF4444</color>
+    <color name="danger_600">#DC2626</color>
+    <color name="warning_500">#F59E0B</color>
+    <color name="success_500">#10B981</color>
+    <color name="info_500">#3B82F6</color>
+
+    <color name="green_500">#4CAF50</color>
+    <color name="red_500">#F44336</color>
+    <color name="status_online">#10B981</color>
+    <color name="status_offline">#EF4444</color>
+    <color name="mode_auto">#3B82F6</color>
+    <color name="mode_manual">#F59E0B</color>
+    <color name="selected_button">#FBBF24</color>
+</resources>

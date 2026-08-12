@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#95A5"
+        android:orientation="vertical">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="辣椒智慧溯源与管理"
+                    android:textColor="@color/black"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="0dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="智慧农业 · 科技赋能"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:alpha="0.85"
+                    android:layout_marginTop="8dp" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="32dp" />
+
+                <!-- 登录卡片 -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="8dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardUseCompatPadding="true">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="24dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="欢迎登录"
+                            android:textColor="@color/gray_900"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="请输入您的账号信息"
+                            android:textColor="@color/gray_500"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="24dp" />
+
+                        <!-- 账号输入 -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="账号"
+                            android:textSize="14sp"
+                            android:textColor="@color/gray_700"
+                            android:layout_marginBottom="8dp" />
+
+                        <EditText
+                            android:id="@+id/et_username"
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:hint="请输入账号"
+                            android:inputType="text"
+                            android:maxLines="1"
+                            android:textSize="16sp"
+                            android:textColor="@color/gray_900"
+                            android:textColorHint="@color/gray_400"
+                            android:background="@drawable/edittext_bg"
+                            android:paddingHorizontal="16dp"
+                            android:layout_marginBottom="16dp" />
+
+                        <!-- 密码输入 -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="密码"
+                            android:textSize="14sp"
+                            android:textColor="@color/gray_700"
+                            android:layout_marginBottom="8dp" />
+
+                        <EditText
+                            android:id="@+id/et_password"
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:hint="请输入密码"
+                            android:inputType="textPassword"
+                            android:maxLines="1"
+                            android:textSize="16sp"
+                            android:textColor="@color/gray_900"
+                            android:textColorHint="@color/gray_400"
+                            android:background="@drawable/edittext_bg"
+                            android:paddingHorizontal="16dp"
+                            android:layout_marginBottom="24dp" />
+
+                        <!-- 登录按钮 -->
+                        <Button
+                            android:id="@+id/btn_login"
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:text="登 录"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/white"
+                            android:background="@drawable/login_button_bg"
+                            android:elevation="4dp" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp" />
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+</layout>

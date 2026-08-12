@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API连接测试</title>
+    <link rel="stylesheet" href="css/floating-panel.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        .test-wrapper {
+            max-width: 600px;
+            width: 100%;
+            animation: slideUp 0.5s ease;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.6rem;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        #result {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            padding: 16px;
+            min-height: 60px;
+            font-size: 0.88rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            color: #88ccff;
+        }
+
+        #result pre {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.82rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: #88ccff;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @media (max-width: 500px) {
+            body { padding: 20px; }
+            h1 { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-wrapper">
+        <h1>⚡ API 连接测试</h1>
+        <div class="floating-panel" style="padding: 32px; text-align: center;">
+            <button class="btn-gradient" onclick="testAPI()" id="testBtn" style="margin-bottom: 20px;">测试API连接</button>
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        async function testAPI() {
+            const result = document.getElementById('result');
+            const btn = document.getElementById('testBtn');
+            btn.innerHTML = '<span class="loading-spinner"></span>测试中...';
+            btn.disabled = true;
+            try {
+                console.log('测试API连接...');
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                result.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                console.log('API响应:', data);
+            } catch (error) {
+                result.innerHTML = '<span style="color:#ff6b81;">❌ 错误: ' + error.message + '</span>';
+                console.error('API错误:', error);
+            } finally {
+                btn.innerHTML = '测试API连接';
+                btn.disabled = false;
+            }
+        }
+
+        window.addEventListener('load', testAPI);
+    </script>
+</body>
+</html>

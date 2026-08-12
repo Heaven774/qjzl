@@ -1,0 +1,52 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Base.Theme.Smartfarm" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary_500</item>
+        <item name="colorPrimaryDark">@color/primary_700</item>
+        <item name="colorPrimaryContainer">@color/primary_100</item>
+        <item name="colorSecondary">@color/secondary_500</item>
+        <item name="colorSecondaryContainer">@color/secondary_100</item>
+        <item name="colorAccent">@color/accent_500</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorSurfaceVariant">@color/gray_100</item>
+        <item name="android:colorBackground">@color/gray_50</item>
+        <item name="colorError">@color/danger_500</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorOnSecondary">@color/gray_900</item>
+        <item name="colorOnBackground">@color/gray_900</item>
+        <item name="colorOnSurface">@color/gray_900</item>
+        <item name="android:statusBarColor">@color/primary_600</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowBackground">@color/gray_50</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.Smartfarm.Medium</item>
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.Smartfarm.Small</item>
+    </style>
+
+    <style name="ShapeAppearance.Smartfarm.Medium" parent="ShapeAppearance.Material3.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
+
+    <style name="ShapeAppearance.Smartfarm.Small" parent="ShapeAppearance.Material3.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
+    <style name="Theme.Smartfarm" parent="Base.Theme.Smartfarm" />
+
+    <style name="TextAppearance.Smartfarm.Headline" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:textColor">@color/gray_900</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextAppearance.Smartfarm.Title" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textColor">@color/gray_800</item>
+    </style>
+
+    <style name="TextAppearance.Smartfarm.Body" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textColor">@color/gray_600</item>
+    </style>
+
+    <style name="TextAppearance.Smartfarm.Caption" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textColor">@color/gray_500</item>
+    </style>
+</resources>

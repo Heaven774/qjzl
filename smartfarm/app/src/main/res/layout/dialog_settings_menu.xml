@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="280dp"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@android:color/white"
+    android:paddingTop="48dp"
+    android:paddingBottom="24dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="设置"
+        android:textSize="25sp"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E0E0E0" />
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="3dp"
+        app:cardUseCompatPadding="true">
+
+        <Button
+            android:id="@+id/btn_logout"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="退出登录"
+            android:textSize="20sp"
+            android:textColor="#FF0000"
+            style="@style/Widget.AppCompat.Button.Borderless" />
+
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>

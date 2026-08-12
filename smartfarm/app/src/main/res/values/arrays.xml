@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="analysis_modes">
+        <item>全部分析</item>
+        <item>区域分析</item>
+        <item>传感器分析</item>
+    </string-array>
+
+    <string-array name="zone_names">
+        <item>幼苗区</item>
+        <item>种植区_环境</item>
+        <item>种植区_土壤</item>
+        <item>烘干区</item>
+    </string-array>
+
+    <string-array name="sensor_display_names">
+        <item>幼苗区_温度</item>
+        <item>幼苗区_湿度</item>
+        <item>幼苗区_光照强度</item>
+        <item>幼苗区_有害气体</item>
+        <item>种植区_环境温度</item>
+        <item>种植区_环境湿度</item>
+        <item>种植区_环境空气质量</item>
+        <item>种植区_环境人体</item>
+        <item>种植区_环境Pm2.5</item>
+        <item>种植区_环境大气压</item>
+        <item>种植区_环境风速</item>
+        <item>种植区_土壤温度</item>
+        <item>种植区_土壤湿度</item>
+        <item>种植区_土壤PH值</item>
+        <item>种植区_土壤氮</item>
+        <item>种植区_土壤磷</item>
+        <item>种植区_土壤钾</item>
+        <item>烘干区_温度</item>
+        <item>烘干区_湿度</item>
+    </string-array>
+
+    <string-array name="sensor_keys">
+        <item>s_temp</item>
+        <item>s_hum</item>
+        <item>s_lx</item>
+        <item>s_sox</item>
+        <item>e_tamb</item>
+        <item>e_ah</item>
+        <item>e_tvoc</item>
+        <item>e_bt</item>
+        <item>e_pm</item>
+        <item>e_patm</item>
+        <item>ws</item>
+        <item>p_temp</item>
+        <item>p_hum</item>
+        <item>p_ph</item>
+        <item>p_N</item>
+        <item>p_P</item>
+        <item>p_K</item>
+        <item>d_temp</item>
+        <item>d_hum</item>
+    </string-array>
+</resources>

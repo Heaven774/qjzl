@@ -1,0 +1,5 @@
+<resources>
+    <!-- 其他字符串 -->
+    <string name="select_device_type">选择设备类型</string>
+    <string name="select_operation_type">选择操作类型</string>
+</resources>

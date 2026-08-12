@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>辣椒运输环境监测系统</title>
+    <link rel="stylesheet" href="css/styles1.css">
+    <link rel="stylesheet" href="css/floating-panel.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/nlecloud-sdk.min.js"></script>
+    <script src="js/script1.js" defer></script>
+    <style>
+        /* 粒子背景容器 */
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: particleFloat 20s infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes particleFloat {
+            0%, 100% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        /* 数据大屏风格标题样式 */
+        .embedded-header {
+            padding: 10px 40px;
+            margin: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 0;
+        }
+
+        .embedded-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary));
+            box-shadow: 0 0 15px var(--primary);
+            border-radius: 0;
+        }
+
+        .embedded-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary));
+        }
+
+        .embedded-header:hover {
+            transform: none;
+            border-color: var(--card-border);
+            box-shadow: var(--glow), 0 0 60px rgba(0, 245, 255, 0.03);
+        }
+
+        /* 右侧数据面板可滚动 */
+        .panel.data-panel.floating-panel {
+            overflow-y: auto;
+        }
+        .panel.config-panel.floating-panel {
+            overflow-y: auto;
+        }
+
+        /* 左侧副标题 */
+        .header-left-text {
+            flex: 1;
+            text-align: left;
+            position: relative;
+        }
+
+        .header-left-text::before {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 30px;
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            border-radius: 2px;
+        }
+
+        .header-left-text p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--primary);
+            letter-spacing: 1px;
+            line-height: 1.4;
+        }
+
+        /* 导航按钮 */
+        .nav-left, .nav-right {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-left {
+            justify-content: flex-end;
+            padding-right: 15px;
+        }
+
+        .nav-right {
+            justify-content: flex-start;
+            padding-left: 15px;
+        }
+
+        .nav-btn {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(0, 245, 255, 0.1);
+            border: 1px solid rgba(0, 245, 255, 0.4);
+            border-radius: 8px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 245, 255, 0.2);
+            border-color: rgba(0, 245, 255, 0.7);
+            transform: translateY(-2px);
+        }
+
+        /* 中间标题 */
+        .header-title-section {
+            flex: 2;
+            text-align: center;
+        }
+
+        .header-title-section h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            background: linear-gradient(90deg, var(--primary), #00ff9d, var(--primary));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 
+                0 0 20px rgba(0, 245, 255, 0.6),
+                0 0 40px rgba(0, 150, 255, 0.3);
+            animation: titleGlow 3s ease infinite;
+            position: relative;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+        }
+
+
+
+        .header-time-section {
+            flex: 1;
+            text-align: right;
+        }
+
+        .header-time-section .current-time {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #00f5ff;
+            text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+            margin-bottom: 4px;
+        }
+
+        .header-time-section .current-date {
+            font-size: 0.85rem;
+            color: #00f5ff;
+            letter-spacing: 1px;
+        }
+
+        /* 隐藏高德地图logo和版权信息 */
+        .amap-logo {
+            display: none !important;
+        }
+        .amap-copyright {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- 数据大屏风格标题 -->
+    <div class="embedded-header floating-panel">
+        <div class="header-left-text">
+            <p>实时监控冷链运输环境数据，保障货物安全</p>
+        </div>
+        <div class="nav-left">
+            <a href="Smart.html" class="nav-btn">📊 数据管理</a>
+        </div>
+        <div class="header-title-section">
+            <h1>辣椒运输车辆监控管理</h1>
+        </div>
+        <div class="nav-right">
+            <a href="sql.html" class="nav-btn">📋 数据中心</a>
+        </div>
+        <div class="header-time-section">
+            <div class="current-time" id="currentTime">--:--:--</div>
+            <div class="current-date" id="currentDate">----年--月--日 星期-</div>
+        </div>
+    </div>
+
+    <div class="main-content" style="margin-top: 80px;">
+        <!-- 左侧车辆管理面板 -->
+        <section class="panel config-panel floating-panel">
+            <div class="panel-header">
+                <span>车辆管理</span>
+                <button class="btn-gradient" onclick="showRegisterForm()">+ 注册车辆</button>
+                <button class="btn-outline" onclick="refreshVehicleList()" style="margin-left: 8px;">🔄 刷新车辆</button>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="vehicle-search" placeholder="搜索车辆编号..." onkeyup="filterVehicles()" class="input-field">
+            </div>
+
+            <!-- 车辆注册表单（更新版本） -->
+            <div class="config-form" id="registerForm" style="display: none; margin-top: 15px;">
+                <h3 style="margin-bottom: 15px; color: var(--primary); text-align: center;">注册新车辆</h3>
+
+                <div class="form-group">
+                    <label for="registerVehicleNumber">车辆编号</label>
+                    <input type="text" id="registerVehicleNumber" placeholder="请输入车辆编号">
+                </div>
+
+                <!-- 主设备配置（温湿度） -->
+                <div class="form-group">
+                    <label for="registerMainDeviceID">主设备ID</label>
+                    <input type="text" id="registerMainDeviceID" placeholder="请输入主设备ID">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="registerTemperatureTag">温度传感器标识</label>
+                        <input type="text" id="registerTemperatureTag" placeholder="温度传感器标识" value="r_temp">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerHumidityTag">湿度传感器标识</label>
+                        <input type="text" id="registerHumidityTag" placeholder="湿度传感器标识" value="r_hum">
+                    </div>
+                </div>
+
+                <!-- 冷链设备配置（CO2） -->
+                <div class="form-group">
+                    <label for="registerColdChainDeviceID">冷链运输设备ID</label>
+                    <input type="text" id="registerColdChainDeviceID" placeholder="请输入冷链运输设备ID">
+                </div>
+                <div class="form-group">
+                    <label for="registerCo2Tag">CO2传感器标识</label>
+                    <input type="text" id="registerCo2Tag" placeholder="CO2传感器标识" value="r_co2">
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn-gradient" onclick="registerAndConnectVehicle()" style="flex: 1;">注册并连接</button>
+                    <button class="btn-outline" onclick="hideRegisterForm()" style="flex: 1;">取消</button>
+                </div>
+            </div>
+
+            <div id="vehicle-list" style="margin-top: 20px;">
+                <div class="loading">暂无车辆，请先注册车辆</div>
+            </div>
+        </section>
+
+        <!-- 中间地图 -->
+        <section class="map-panel floating-panel">
+            <div id="map-container" style="width: 100%; height: 100%; position: relative;">
+                <div class="map-loading" id="mapLoading">
+                    <div class="spinner"></div>
+                    <p>地图加载中...</p>
+                </div>
+            </div>
+            <div class="map-controls">
+                <!-- 地图类型切换下拉菜单 -->
+                <select class="map-type-select" id="mapTypeSelect" onchange="changeMapType()">
+                    <option value="normal">普通地图</option>
+                    <option value="satellite" selected>卫星图</option>
+                    <option value="terrain">地形图</option>
+                </select>
+                <button class="btn-gradient" onclick="centerOnVehicle()">定位车辆</button>
+            </div>
+        </section>
+
+        <!-- 右侧数据展示 -->
+        <section class="panel data-panel floating-panel">
+            <div class="panel-header">
+                <span>实时环境数据</span>
+                <span id="selected-vehicle" style="color: var(--primary); font-size: 1.1rem;">未选择车辆</span>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="stat-card">
+                    <div class="metric-name">🌡️ 温度</div>
+                    <div class="metric-value" id="r_temp-value">--<span class="metric-unit">°C</span></div>
+                    <span class="metric-status status-normal" id="r_temp-status">正常</span>
+                </div>
+                <div class="stat-card">
+                    <div class="metric-name">💧 湿度</div>
+                    <div class="metric-value" id="r_hum-value">--<span class="metric-unit">%</span></div>
+                    <span class="metric-status status-normal" id="r_hum-status">正常</span>
+                </div>
+                <div class="stat-card">
+                    <div class="metric-name">🌫 CO2</div>
+                    <div class="metric-value" id="r_co2-value">--<span class="metric-unit">ppm</span></div>
+                    <span class="metric-status status-normal" id="r_co2-status">正常</span>
+                </div>
+                <div class="stat-card">
+                    <div class="metric-name">🕒 最后更新</div>
+                    <div class="metric-value" id="update-time">--</div>
+                    <span class="metric-name" id="update-location">--</span>
+                </div>
+            </div>
+
+            <div class="panel-header" style="margin-top: 10px;">
+                <span>温度实时变化</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="r_temp-chart" width="100%" height="150"></canvas>
+            </div>
+
+            <div class="panel-header" style="margin-top: 10px;">
+                <span>湿度实时变化</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="r_hum-chart" width="100%" height="150"></canvas>
+            </div>
+
+            <div class="panel-header" style="margin-top: 10px;">
+                <span>CO2实时变化</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="r_co2-chart" width="100%" height="150"></canvas>
+            </div>
+
+            <div class="panel-header" style="margin-top: 10px;">
+                <span>设备状态</span>
+            </div>
+            <div class="device-status-grid">
+                <div class="floating-card">
+                    <div class="status-label">主设备</div>
+                    <div class="status-value" id="main-device-status">未连接</div>
+                </div>
+                <div class="floating-card">
+                    <div class="status-label">冷链设备</div>
+                    <div class="status-value" id="coldchain-device-status">未连接</div>
+                </div>
+            </div>
+        </section>
+    </div>
+        <div id="particles"></div>
+    </div>
+
+    <script>
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 40; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 15) + 's';
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+    </script>
+</body>
+</html>

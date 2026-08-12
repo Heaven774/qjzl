@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>辣椒产业数据管理平台</title>
+    <link rel="stylesheet" href="qjzl/css/floating-panel.css">
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .header-top { margin-bottom: 30px; }
+
+        .pepper-icon {
+            font-size: 4.5rem;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+        }
+
+        h1 {
+            font-size: 3.2rem;
+            margin-bottom: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .card-icon {
+            font-size: 3.2rem;
+            margin-bottom: 18px;
+            display: block;
+        }
+
+        .card-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--primary);
+        }
+
+        .card-description {
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            line-height: 1.7;
+            margin-bottom: 20px;
+            flex: 1;
+        }
+
+        .card-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            transition: var(--transition);
+        }
+
+        .card-link:hover { gap: 16px; }
+
+        footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(0, 245, 255, 0.08);
+        }
+
+        .footer-text {
+            color: var(--text-dim);
+            font-size: 0.88rem;
+        }
+
+        .current-time {
+            margin-top: 8px;
+            font-size: 0.95rem;
+            color: var(--text-dim);
+        }
+
+        @media (max-width: 900px) {
+            h1 { font-size: 2.4rem; }
+            .cards-container { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 500px) {
+            h1 { font-size: 1.8rem; }
+        }
+
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            top: 0;
+            width: 3px; height: 3px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: particleFloat 15s infinite;
+            opacity: 0.5;
+        }
+
+        @keyframes particleFloat {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.5; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div id="particles"></div>
+    
+    <div class="container">
+        <header>
+            <div class="header-top">
+                <div class="pepper-icon">🌶️</div>
+                <h1>辣椒产业数据管理平台</h1>
+                <p class="subtitle">科技赋能椒田 · 智慧点亮农产</p>
+            </div>
+        </header>
+
+        <div class="cards-container">
+            <a href="/qjzl/Smart.html" class="floating-card" style="cursor: pointer; text-decoration: none; color: var(--light); display: flex; flex-direction: column; padding: 36px 32px;">
+                <span class="card-icon">📊</span>
+                <h2 class="card-title">产业数据管理</h2>
+                <p class="card-description">
+                    实时监控辣椒种植环境数据，智能分析设备运行状态，
+                    提供AI预测建议，助力科学种植决策。
+                </p>
+                <span class="card-link">
+                    进入系统 →
+                </span>
+            </a>
+
+            <a href="/qjzl/lenglian.html" class="floating-card" style="cursor: pointer; text-decoration: none; color: var(--light); display: flex; flex-direction: column; padding: 36px 32px;">
+                <span class="card-icon">🚛</span>
+                <h2 class="card-title">运输车辆管理</h2>
+                <p class="card-description">
+                    实时追踪冷链运输车辆位置，监控温湿度等环境参数，
+                    保障辣椒运输品质，实现全程可视化管理。
+                </p>
+                <span class="card-link">
+                    进入系统 →
+                </span>
+            </a>
+
+            <a href="/qjzl/sql.html" class="floating-card" style="cursor: pointer; text-decoration: none; color: var(--light); display: flex; flex-direction: column; padding: 36px 32px;">
+                <span class="card-icon">🗄️</span>
+                <h2 class="card-title">数据管理中心</h2>
+                <p class="card-description">
+                    查询传感器数据、设备状态、AI分析记录，
+                    查看车辆历史轨迹与系统日志，全面追溯数据来源。
+                </p>
+                <span class="card-link">
+                    进入系统 →
+                </span>
+            </a>
+        </div>
+
+        <footer>
+            <p class="footer-text">© 2026 辣椒智慧农业管理平台 · 用技术守护每一颗辣椒</p>
+            <div class="current-time" id="currentTime"></div>
+        </footer>
+    </div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            document.getElementById('currentTime').textContent = timeStr;
+        }
+
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        createParticles();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const storedConfig = sessionStorage.getItem('platformConfig');
+            const monitorCard = document.querySelector('.cards-container a:first-child');
+            if (storedConfig && monitorCard) {
+                monitorCard.href = 'qjzl/Smart.html';
+            }
+        });
+    </script>
+</body>
+</html>

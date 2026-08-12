@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 请求互联网权限 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- 请求访问网络状态的权限 -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- 请求保持唤醒锁的权限 -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- 请求写外部存储的权限，仅限 SDK 版本 28 及以下 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/co_"
+        android:label="辣椒智联"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.SmartFarm"
+        android:usesCleartextTraffic="true">
+
+    <!-- 启动屏幕 Activity -->
+    <activity
+        android:name=".LaunchScreenActivity"
+        android:exported="false" /> <!-- 允许其他应用启动此 Activity -->
+
+
+    <!-- 主 Activity -->
+    <activity
+        android:name=".MainActivity"
+        android:exported="false" /> <!-- 允许其他应用启动此 Activity -->
+
+    <!-- 登录 Activity -->
+    <activity
+        android:name=".LoginActivity"
+        android:exported="true">
+        <!-- 设置此 Activity 为应用的入口点 -->
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" /> <!-- 主动作 -->
+            <category android:name="android.intent.category.LAUNCHER" /> <!-- 启动器类别 -->
+        </intent-filter>
+    </activity>
+</application>
+
+</manifest>

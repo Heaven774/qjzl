@@ -1,0 +1,37 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- 基础应用主题 -->
+    <style name="Theme.SmartFarm" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- 自定义主题属性（可选） -->
+        <item name="colorPrimary">#2196F3</item> <!-- 主色调（蓝色，与之前按钮配色一致） -->
+        <item name="colorPrimaryVariant">#1976D2</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#FF9800</item>
+        <item name="colorSecondaryVariant">#F57C00</item>
+        <item name="colorOnSecondary">#000000</item>
+        <!-- 去除ActionBar（与代码布局匹配） -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <!-- 适配状态栏 -->
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+    </style>
+    <style name="TransparentDialog" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
+    </style>
+    <style name="RoundedDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.MyApp.Dialog.Rounded</item>
+    </style>
+
+    <style name="ShapeAppearanceOverlay.MyApp.Dialog.Rounded" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
+    <style name="RoundedAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/bg_dialog_rounded</item>
+    </style>
+</resources>

@@ -1,0 +1,72 @@
+# ============================================================
+# 环境变量 / 密钥 / 凭据 - 绝对禁止提交
+# ============================================================
+.env
+.env.local
+.env.*.local
+
+# ============================================================
+# H5端 - 运行时生成 / 大文件
+# ============================================================
+# 视频流分片(运行时生成,不应入库)
+html/qjzl/hls/*
+!html/qjzl/hls/.gitkeep
+
+# FFmpeg 可执行文件与文档(Windows 二进制,体积大,部署时自行下载)
+html/qjzl/ffmpeg-master-latest-win64-gpl/
+
+# Node 依赖与构建产物
+html/qjzl/server/node_modules/
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.python-version
+html/trac/image_stage_cache.json
+
+# 本地运行脚本生成的日志
+*.log
+
+# ============================================================
+# Android 端 - 构建产物与 IDE
+# ============================================================
+# Gradle
+smartfarm/.gradle/
+smartfarm/build/
+smartfarm/app/build/
+smartfarm/local.properties
+
+# IDE 配置
+smartfarm/.idea/
+smartfarm/.vscode/
+smartfarm/**/*.iml
+smartfarm/**/captures/
+smartfarm/**/*.apk
+smartfarm/**/*.aab
+smartfarm/**/*.ap_
+
+# ============================================================
+# 操作系统 / 编辑器
+# ============================================================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# 编辑器临时文件
+*.swp
+*.swo
+*~
+
+# ============================================================
+# Docker 本地数据卷
+# ============================================================
+html/deploy/.data/
+html/deploy/mariadb_data/
+*.tar
+*.tar.gz

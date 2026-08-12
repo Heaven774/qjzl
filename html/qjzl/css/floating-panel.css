@@ -1,0 +1,471 @@
+/* ============================================
+   辣椒智慧农业 - 悬浮面板通用样式
+   ============================================ */
+
+:root {
+    --primary: #00f5ff;
+    --primary-dim: rgba(0, 245, 255, 0.08);
+    --primary-dark: #00c6ff;
+    --secondary: #7e42ff;
+    --secondary-dark: #5a2bd9;
+    --accent: #ff2a6d;
+    --accent-dark: #d91c5c;
+    --success: #00ff9d;
+    --success-dim: rgba(0, 255, 157, 0.12);
+    --warning: #ffde21;
+    --danger: #ff2a6d;
+    --danger-dim: rgba(255, 42, 109, 0.12);
+    --dark: #0a0e17;
+    --darker: #050811;
+    --light: #e0f7ff;
+    --text-dim: rgba(224, 247, 255, 0.55);
+    --card-bg: rgba(12, 18, 30, 0.92);
+    --card-border: rgba(0, 245, 255, 0.18);
+    --border-subtle: rgba(0, 245, 255, 0.10);
+    --glow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    --glow-primary: 0 0 20px rgba(0, 245, 255, 0.5);
+    --radius-sm: 8px;
+    --radius: 12px;
+    --radius-lg: 16px;
+    --radius-full: 24px;
+    --shadow-hover: 0 8px 40px rgba(0, 245, 255, 0.12);
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ========== 基础重置 ========== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Microsoft YaHei', 'PingFang SC', 'Segoe UI', Arial, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #020408 0%, #050811 50%, #0a0e17 100%);
+    color: var(--light);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ========== 背景光晕 ========== */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+        radial-gradient(circle at 20% 80%, rgba(0, 245, 255, 0.10) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(126, 66, 255, 0.10) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(255, 42, 109, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* ========== 浮动面板 ========== */
+.floating-panel {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: var(--glow), 0 0 60px rgba(0, 245, 255, 0.03);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+/* 面板顶部渐变装饰线 */
+.floating-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.floating-panel:hover {
+    border-color: rgba(0, 245, 255, 0.30);
+    box-shadow: var(--shadow-hover), 0 0 80px rgba(0, 245, 255, 0.06);
+    transform: translateY(-2px);
+}
+
+/* 面板标题 */
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border-subtle);
+    gap: 12px;
+}
+
+.panel-header h2,
+.panel-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.panel-body {
+    padding: 20px;
+}
+
+/* ========== 浮动卡片（网格用） ========== */
+.floating-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--glow);
+    transition: var(--transition);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.floating-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.floating-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0, 245, 255, 0.30);
+    box-shadow: var(--shadow-hover);
+}
+
+/* ========== 渐变按钮 ========== */
+.btn-gradient {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 24px;
+    border: none;
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0, 245, 255, 0.25);
+}
+
+.btn-gradient:active {
+    transform: translateY(0);
+}
+
+.btn-gradient::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.08), transparent);
+    transform: rotate(45deg) translateX(-100%);
+    transition: 0.5s;
+}
+
+.btn-gradient:hover::after {
+    transform: rotate(45deg) translateX(100%);
+}
+
+/* ========== 线条按钮 ========== */
+.btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 20px;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--light);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.btn-outline:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-dim);
+    transform: translateY(-1px);
+}
+
+/* ========== 统计卡片 ========== */
+.stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    backdrop-filter: blur(12px);
+    box-shadow: var(--glow);
+    padding: 18px 20px;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0, 245, 255, 0.30);
+    box-shadow: var(--shadow-hover);
+}
+
+.stat-card .stat-icon {
+    font-size: 1.6rem;
+    margin-bottom: 8px;
+}
+
+.stat-card .stat-label {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.stat-card .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ========== 输入框 ========== */
+.input-field {
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    color: var(--light);
+    font-size: 0.85rem;
+    outline: none;
+    transition: var(--transition);
+}
+
+.input-field:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 12px rgba(0, 245, 255, 0.15);
+    background: rgba(255,255,255,0.08);
+}
+
+.input-field::placeholder {
+    color: var(--text-dim);
+}
+
+/* ========== 选择框 ========== */
+select.input-field {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300f5ff' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+}
+
+/* ========== 滚动条 ========== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0, 245, 255, 0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0, 245, 255, 0.35); }
+
+/* ========== 动画 ========== */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+}
+
+@keyframes glow {
+    0%, 100% { box-shadow: var(--glow); }
+    50% { box-shadow: var(--shadow-hover), 0 0 40px rgba(0, 245, 255, 0.08); }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.floating-panel, .floating-card, .stat-card {
+    animation: slideUp 0.5s ease both;
+}
+
+.floating-panel:nth-child(2), .floating-card:nth-child(2), .stat-card:nth-child(2) { animation-delay: 0.05s; }
+.floating-panel:nth-child(3), .floating-card:nth-child(3), .stat-card:nth-child(3) { animation-delay: 0.1s; }
+.floating-panel:nth-child(4) { animation-delay: 0.15s; }
+.floating-panel:nth-child(5) { animation-delay: 0.2s; }
+.floating-panel:nth-child(6) { animation-delay: 0.25s; }
+.floating-panel:nth-child(7) { animation-delay: 0.3s; }
+.floating-panel:nth-child(8) { animation-delay: 0.35s; }
+
+/* ========== 表格美化 ========== */
+.table-floating {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+
+.table-floating thead th {
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--primary);
+    border-bottom: 1px solid var(--card-border);
+    background: rgba(0, 245, 255, 0.04);
+    white-space: nowrap;
+}
+
+.table-floating tbody tr {
+    transition: var(--transition);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.table-floating tbody tr:last-child {
+    border-bottom: none;
+}
+
+.table-floating tbody tr:hover {
+    background: var(--primary-dim);
+}
+
+.table-floating tbody td {
+    padding: 10px 14px;
+    vertical-align: middle;
+}
+
+/* ========== 状态徽章 ========== */
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.badge-success { background: var(--success-dim); color: var(--success); }
+.badge-warning { background: rgba(255, 222, 33, 0.15); color: var(--warning); }
+.badge-danger { background: var(--danger-dim); color: var(--danger); }
+.badge-info { background: var(--primary-dim); color: var(--primary); }
+
+/* ========== Toast 通知 ========== */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.toast {
+    padding: 12px 20px;
+    border-radius: var(--radius);
+    backdrop-filter: blur(16px);
+    color: var(--light);
+    font-size: 0.85rem;
+    box-shadow: var(--shadow-hover);
+    animation: slideUp 0.3s ease;
+    border: 1px solid;
+    min-width: 200px;
+}
+
+.toast-success { background: rgba(0, 255, 157, 0.15); border-color: rgba(0, 255, 157, 0.3); }
+.toast-error { background: rgba(255, 42, 109, 0.15); border-color: rgba(255, 42, 109, 0.3); }
+.toast-info { background: rgba(0, 245, 255, 0.12); border-color: rgba(0, 245, 255, 0.25); }
+
+/* ========== 空状态 ========== */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-dim);
+}
+
+.empty-state .empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.empty-state p {
+    font-size: 0.85rem;
+}
+
+/* ========== 加载动画 ========== */
+.loading-spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--card-border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-overlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 40px;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+}
+
+/* ========== 响应式 ========== */
+@media (max-width: 768px) {
+    .panel-body { padding: 14px; }
+    .floating-card { padding: 14px; }
+    .stat-card { padding: 14px; }
+    .stat-card .stat-value { font-size: 1.2rem; }
+}

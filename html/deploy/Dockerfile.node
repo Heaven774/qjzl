@@ -1,0 +1,31 @@
+# ============================================
+# 辣椒智慧农业 - Node.js API 服务
+# ============================================
+FROM rockylinux/rockylinux:10
+
+# 配置国内 yum 镜像源
+
+# 安装 Node.js 18
+RUN curl -fsSL https://rpm.nodesource.com/setup_18.x | bash - \
+    && yum install -y -q nodejs \
+    && yum clean all \
+    && rm -rf /var/cache/yum/*
+
+# 设置国内 npm 镜像源
+RUN npm config set registry https://registry.npmmirror.com/
+
+WORKDIR /app
+
+# 先复制依赖文件并安装（利用 Docker 缓存）
+COPY qjzl/server/package*.json ./
+RUN npm install --production
+
+# 复制服务端代码
+COPY qjzl/server/ ./server/
+COPY qjzl/sql/ ./sql/
+
+# 暴露 API 端口
+EXPOSE 3000
+
+# 启动服务
+CMD ["node", "server/server.js"]
